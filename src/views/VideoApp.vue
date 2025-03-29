@@ -54,16 +54,23 @@
     <!-- 右侧交互区 -->
     <div class="interaction-panel">
       <div class="user-section">
-        <img
-            :src="currentVideo.authorAvatar"
-            class="avatar"
-            @click="navigateToProfile"
-        >
-        <button
-            class="follow-btn"
-            @click="toggleFollow"
-            :class="{ followed: currentVideo.isFollowing }"
-        >+</button>
+        <div class="avatar-wrapper">
+          <img
+              :src="currentVideo.authorAvatar"
+              class="avatar"
+              @click="navigateToProfile"
+          >
+          <button
+              class="follow-btn"
+              @click="toggleFollow"
+              :class="{ followed: currentVideo.isFollowing }"
+          >
+            <svg class="follow-icon" viewBox="0 0 24 24">
+              <path v-if="!currentVideo.isFollowing" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              <path v-else d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="action-buttons">
@@ -91,8 +98,86 @@
           <div class="icon-wrapper">
             <div class="icon">💬</div>
           </div>
-          <div class="count">{{ currentVideo.comments }}</div>
+          <div class="count">{{ currentVideo.comments.length }}</div>
         </div>
+        <!-- 评论抽屉结构 -->
+<!--        <div v-if="showComments" class="comments-overlay" @click.self="closeComments">-->
+<!--          <div class="comments-drawer">-->
+<!--            &lt;!&ndash; 抽屉头部 &ndash;&gt;-->
+<!--            <div class="drawer-header">-->
+<!--              <h3>视频评论（{{ currentVideo.comments?.length || 0 }}）</h3>-->
+<!--              <button class="close-btn" @click="closeComments">×</button>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; 评论列表容器 &ndash;&gt;-->
+<!--            <div class="comments-container">-->
+<!--              <div-->
+<!--                  v-for="(comment, index) in currentVideo.comments"-->
+<!--                  :key="index"-->
+<!--                  class="comment-item"-->
+<!--              >-->
+<!--                <div class="user-avatar">-->
+<!--                  <img :src="comment.user.avatar" alt="用户头像">-->
+<!--                </div>-->
+<!--                <div class="comment-content">-->
+<!--                  <div class="username">{{ comment.user.name }}</div>-->
+<!--                  <div class="text">{{ comment.content }}</div>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+
+
+        <!-- 带过渡效果的遮罩层 -->
+        <transition name="fade">
+          <div
+              v-if="showComments"
+              class="comments-overlay"
+              @click.self="closeComments"
+          >
+            <transition name="slide">
+              <div
+                  v-if="showComments"
+                  class="comments-drawer"
+              >
+                <div class="drawer-header">
+                  <h3>视频评论（{{ currentVideo.comments?.length || 0 }}）</h3>
+                  <button class="close-btn" @click="closeComments">
+                    <svg class="icon" viewBox="0 0 24 24">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                  </button>
+                </div>
+                <!-- 评论列表 -->
+                <div class="comments-container">
+                  <transition-group
+                      name="comment-fade"
+                      tag="div"
+                  >
+                    <div
+                        v-for="(comment, index) in currentVideo.comments"
+                        :key="comment.id || index"
+                        class="comment-item"
+                    >
+                      <div class="user-avatar">
+                        <img
+                            :src="comment.user.avatar"
+                            :alt="comment.user.name"
+                            class="avatar-img"
+                        >
+                      </div>
+                      <div class="comment-content">
+                        <div class="username">{{ comment.user.name }}</div>
+                        <div class="text">{{ comment.content }}</div>
+                      </div>
+                    </div>
+                  </transition-group>
+                </div>
+              </div>
+            </transition>
+          </div>
+        </transition>
       </div>
     </div>
   </div></template>
@@ -135,7 +220,67 @@ const videos = reactive<Video[]>([
     tags: ['测试', '演示'],
     likes: 100,
     collects: 50,
-    comments: 30,
+    comments: [
+      {
+        id: 1,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+          name: '数码达人王'
+        },
+        content: '这个特效太炸了！求教程！',
+        likes: 142,
+        timestamp: 1630454400
+      },
+      {
+        id: 2,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/12.jpg',
+          name: '美妆小仙女💄'
+        },
+        content: '背景音乐是什么呀？跪求歌名！',
+        likes: 89,
+        timestamp: 1630447200
+      },
+      {
+        id: 3,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+          name: '科技宅小明'
+        },
+        content: '拍摄设备是用的哪款相机？画质太棒了👏👏',
+        likes: 256,
+        timestamp: 1630368000
+      },
+      {
+        id: 4,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/45.jpg',
+          name: '旅行家Lily'
+        },
+        content: '这个地方我去过！实际景色比视频里还美～',
+        likes: 302,
+        timestamp: 1630281600
+      },
+      {
+        id: 5,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/8.jpg',
+          name: '健身教练Mike'
+        },
+        content: '动作指导很专业！但新手要注意保护关节哦💪',
+        likes: 178,
+        timestamp: 1630195200
+      },
+      {
+        id: 6,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/22.jpg',
+          name: '美食探店王'
+        },
+        content: '看饿了...求餐馆定位！',
+        likes: 421,
+        timestamp: 1630108800
+      }],
     isLiked: false,
     isCollected: false,
     isFollowing: false
@@ -150,14 +295,91 @@ const videos = reactive<Video[]>([
     tags: ['新', '来'],
     likes: 301,
     collects: 33,
-    comments: 3,
+    comments: [
+      {
+        id: 1,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+          name: '数码达人王'
+        },
+        content: '这个特效太炸了！求教程！',
+        likes: 142,
+        timestamp: 1630454400
+      },
+      {
+        id: 2,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/12.jpg',
+          name: '美妆小仙女💄'
+        },
+        content: '背景音乐是什么呀？跪求歌名！',
+        likes: 89,
+        timestamp: 1630447200
+      },
+      {
+        id: 3,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+          name: '科技宅小明'
+        },
+        content: '拍摄设备是用的哪款相机？画质太棒了👏👏',
+        likes: 256,
+        timestamp: 1630368000
+      },
+      {
+        id: 4,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/45.jpg',
+          name: '旅行家Lily'
+        },
+        content: '这个地方我去过！实际景色比视频里还美～',
+        likes: 302,
+        timestamp: 1630281600
+      },
+      {
+        id: 5,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/men/8.jpg',
+          name: '健身教练Mike'
+        },
+        content: '动作指导很专业！但新手要注意保护关节哦💪',
+        likes: 178,
+        timestamp: 1630195200
+      },
+      {
+        id: 6,
+        user: {
+          avatar: 'https://randomuser.me/api/portraits/women/22.jpg',
+          name: '美食探店王'
+        },
+        content: '看饿了...求餐馆定位！',
+        likes: 421,
+        timestamp: 1630108800
+      }],
     isLiked: false,
     isCollected: false,
     isFollowing: false
   },
   // 添加更多虚拟视频...
 ])
+// 控制抽屉显示的状态
+const showComments = ref(false)
 
+// 切换评论抽屉
+// const toggleComments = () => {
+//   showComments.value = !showComments.value
+// }
+// 在script中确保状态声明正确
+// const showComments = ref(false)
+const toggleComments = () => {
+  console.log('触发toggle，当前状态:', showComments.value) // 调试日志
+  showComments.value = !showComments.value
+}
+
+// 关闭抽屉（支持两种触发方式）
+const closeComments = () => {
+  showComments.value = false
+}
 const currentIndex = ref(0)
 const videoElement = ref<HTMLVideoElement>()
 const isPlaying = ref(true)
@@ -498,5 +720,342 @@ video {
   gap: 6px;
   font-size: 12px;
   opacity: 0.8;
+}
+/* 评论按钮样式 */
+.action-item {
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.2s;
+}
+
+/* 遮罩层样式 */
+.comments-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* 抽屉主体样式 */
+.comments-drawer {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  max-height: 80vh;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 抽屉头部 */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.close-btn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+/* 可滚动评论区域 */
+.comments-container {
+  overflow-y: auto;
+  padding: 16px;
+  flex-grow: 1;
+}
+
+/* 单条评论样式 */
+.comment-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.comment-content {
+  flex-grow: 1;
+}
+
+.username {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.text {
+  color: #666;
+  line-height: 1.4;
+}
+/* 遮罩层淡入淡出 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 抽屉滑动动画 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateY(100%);
+}
+
+/* 核心布局 */
+.comments-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.comments-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh; /* 屏幕高度一半 */
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.drawer-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 0.7;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: #666;
+}
+
+.comments-container {
+  height: calc(50vh - 64px); /* 计算可用高度 */
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+/* 优化滚动条 */
+.comments-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.comments-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .comments-drawer {
+    height: 60vh; /* 移动端显示更多内容 */
+  }
+
+  .comments-container {
+    height: calc(60vh - 64px);
+  }
+}
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  padding: 12px 0;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* 移除默认点击效果 */
+  background: none;
+  border: none;
+  outline: none;
+  padding: 8px;
+  /* 防止文字选中 */
+  user-select: none;
+}
+
+/* 移除按钮点击轮廓 */
+.action-item:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.icon-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 移除背景边框 */
+  background: none;
+  border: none;
+}
+
+.icon {
+  font-size: 24px;
+  /* 移除文本阴影 */
+  text-shadow: none;
+  transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  /* 修复emoji对齐问题 */
+  line-height: 1;
+  transform: translateY(2px);
+}
+
+/* 点击动画 */
+.action-item:active .icon {
+  transform: scale(0.9);
+}
+
+.count {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-family: system-ui;
+}
+
+/* 过渡效果优化 */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.2s ease;
+  position: absolute;
+}
+
+.scale-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(4px);
+}
+
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(1.2) translateY(-4px);
+}
+
+/* 悬停效果 */
+.action-item:hover {
+  transform: translateY(-2px);
+}
+
+.action-item:hover .icon {
+  filter: brightness(1.1);
+}
+
+/* 已点赞/收藏状态 */
+.action-item[data-active="true"] .icon {
+  filter: drop-shadow(0 2px 4px rgba(255, 65, 65, 0.2));
+}
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* 精确调整关注按钮 */
+.follow-btn {
+  position: absolute;
+  bottom: -4px;  /* 更靠近头像 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;    /* 更小尺寸 */
+  height: 20px;
+  border-radius: 50%;
+  background: #FE2C55;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;  /* 确保在头像上方 */
+}
+
+/* 超小尺寸图标 */
+.follow-icon {
+  width: 10px;  /* 缩小图标 */
+  height: 10px;
+  fill: #fff;
+  transition: all 0.2s ease;
+}
+
+/* 已关注状态完全隐藏按钮 */
+.follow-btn.followed {
+  opacity: 0;
+  transform: translateX(-50%) scale(0);
+}
+
+/* 悬停交互优化 */
+.follow-btn:not(.followed):hover {
+  background: #ff4769;
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* 点击动画 */
+.follow-btn:active {
+  transform: translateX(-50%) scale(0.9);
+}
+
+/* 头像悬停效果 */
+.avatar:hover {
+  transform: scale(1.05);
 }
 </style>
