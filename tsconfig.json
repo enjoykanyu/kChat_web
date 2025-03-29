@@ -1,0 +1,15 @@
+{
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx","src/**/*.vue","components.d.ts","auto-imports.d.ts"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+    "isolatedModules": false,
+    "ignoreDeprecations": "5.0",
+    "verbatimModuleSyntax": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
