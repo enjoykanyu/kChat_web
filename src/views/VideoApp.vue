@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
+  <div class="video-container" @touchstart="handleTouchStart" @touchend="handleTouchEnd" ref="videoContainer">
     <!-- 视频容器 -->
     <div class="video-wrapper" :class="currentVideo.isLandscape ? 'landscape' : 'portrait'">
       <video
@@ -287,7 +287,7 @@ const videos = reactive<Video[]>([
   },
   {
     id: 2,
-    url: 'https://www.runoob.com/try/demo_source/movie.mp4',
+    url: 'http://vjs.zencdn.net/v/oceans.mp4',
     isLandscape: true,
     author: 'user2',
     authorAvatar: 'https://picsum.photos/60',
@@ -451,41 +451,81 @@ const sendDanmaku = () => {
   }
 }
 
+// 视频容器Ref
+const videoContainer = ref<HTMLElement>()
+// 动画是否进行中
+const isAnimating = ref(false)
+// 当前滑动距离
+const currentTranslateY = ref(0)
+// 触摸起始坐标
+// const touchStartY = ref(0)
+// 触摸时间戳
+const touchStartTime = ref(0)
+
 const handleTouchStart = (e: TouchEvent) => {
-  // 确保存在有效触摸点
+  if (isAnimating.value) return
   if (e.touches.length === 0) return
-  console.log(e.touches)
-  // 正确获取第一个触摸点的坐标
+
   touchStartY.value = e.touches[0].clientY
-  console.log('起始坐标:', touchStartY.value)
+  console.log('touchStartY', touchStartY.value)
+  touchStartTime.value = Date.now()
+  videoContainer.value!.style.transition = 'none' // 禁用过渡
 }
 
-// const handleTouchEnd = (e: TouchEvent) => {
-//   // 确保存在结束触摸点
-//   if (e.changedTouches.length === 0) return
-//
-//   // 正确获取结束坐标
-//   const endY = e.changedTouches[0].clientY
-//   console.log('结束坐标:', endY)
-//
-//   // 计算滑动距离
-//   const deltaY = endY - touchStartY.value
-//   console.log('滑动距离:', deltaY)
-// }
+const handleTouchMove = (e: TouchEvent) => {
+  if (isAnimating.value) return
+
+  const currentY = e.touches.clientY
+  const deltaY = currentY - touchStartY.value
+
+  // 限制最大滑动距离
+  currentTranslateY.value = Math.abs(deltaY) > 200
+      ? 200 * (deltaY > 0 ? 1 : -1)
+      : deltaY
+
+  applyTransform()
+}
 
 const handleTouchEnd = (e: TouchEvent) => {
-  const deltaY = e.changedTouches[0].clientY - touchStartY.value
+  if (isAnimating.value) return
+
+  const endY = e.changedTouches[0].clientY
+  const deltaY = endY - touchStartY.value
+  const deltaTime = Date.now() - touchStartTime.value
+  const velocity = deltaY / deltaTime // 计算滑动速度
   console.log(deltaY)
-  if (Math.abs(deltaY) > 50) {
-    if (deltaY > 0) {
-      // 上滑加载前一个
-      currentIndex.value = Math.max(0, currentIndex.value - 1)
-    } else {
-      // 下滑加载下一个
-      currentIndex.value = Math.min(videos.length - 1, currentIndex.value + 1)
-    }
-    isPlaying.value = true
-    progress.value = 0
+  // 启用过渡动画
+  videoContainer.value!.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)'
+
+  // 根据速度和距离判断切换方向
+  if (Math.abs(deltaY) > 120 || Math.abs(velocity) > 0.3) {
+    currentTranslateY.value = deltaY > 0 ? window.innerHeight : -window.innerHeight
+    applyTransform()
+
+    setTimeout(() => {
+      isAnimating.value = true
+      // 切换视频逻辑
+      currentIndex.value += deltaY > 0 ? -1 : 1
+      // 重置位置
+      currentTranslateY.value = 0
+      applyTransform()
+      // 等待布局更新
+      requestAnimationFrame(() => {
+        videoContainer.value!.style.transition = 'none'
+        isAnimating.value = false
+      })
+    }, 400)
+  } else {
+    // 回弹动画
+    currentTranslateY.value = 0
+    applyTransform()
+  }
+}
+
+// 应用变换
+const applyTransform = () => {
+  if (videoContainer.value) {
+    videoContainer.value.style.transform = `translateY(${currentTranslateY.value}px)`
   }
 }
 // const handleTouchEnd = (e: TouchEvent) => {
@@ -547,9 +587,23 @@ onMounted(() => {
 .video-wrapper {
   position: relative;
   width: 100%;
-  height: 100%;
+  overflow: hidden;
+  background: #000;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+/* 横屏视频适配 */
+.landscape video {
+  width: 100%;
+  object-fit: contain;
 }
 
+/* 竖屏视频适配 */
+.portrait video {
+  height: 100%;
+  object-fit: cover;
+}
 video {
   position: absolute;
   max-width: 100%;
@@ -1058,4 +1112,36 @@ video {
 .avatar:hover {
   transform: scale(1.05);
 }
+.video-container {
+  width: 100vw;
+  height: 100vh;
+  will-change: transform; /* 优化动画性能 */
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  /* 滑动时显示下方视频预览 */
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: 5%;
+    width: 90%;
+    height: 20%;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &.swiping::after {
+    opacity: 0.4;
+  }
+}
+
 </style>
