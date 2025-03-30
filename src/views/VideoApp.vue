@@ -100,34 +100,6 @@
           </div>
           <div class="count">{{ currentVideo.comments.length }}</div>
         </div>
-        <!-- 评论抽屉结构 -->
-<!--        <div v-if="showComments" class="comments-overlay" @click.self="closeComments">-->
-<!--          <div class="comments-drawer">-->
-<!--            &lt;!&ndash; 抽屉头部 &ndash;&gt;-->
-<!--            <div class="drawer-header">-->
-<!--              <h3>视频评论（{{ currentVideo.comments?.length || 0 }}）</h3>-->
-<!--              <button class="close-btn" @click="closeComments">×</button>-->
-<!--            </div>-->
-
-<!--            &lt;!&ndash; 评论列表容器 &ndash;&gt;-->
-<!--            <div class="comments-container">-->
-<!--              <div-->
-<!--                  v-for="(comment, index) in currentVideo.comments"-->
-<!--                  :key="index"-->
-<!--                  class="comment-item"-->
-<!--              >-->
-<!--                <div class="user-avatar">-->
-<!--                  <img :src="comment.user.avatar" alt="用户头像">-->
-<!--                </div>-->
-<!--                <div class="comment-content">-->
-<!--                  <div class="username">{{ comment.user.name }}</div>-->
-<!--                  <div class="text">{{ comment.content }}</div>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-
 
         <!-- 带过渡效果的遮罩层 -->
         <transition name="fade">
@@ -615,6 +587,7 @@ video {
 
 /* 进度条容器 */
 .progress-container {
+  z-index: 100;
   position: absolute;
   bottom: 0;
   left: 0;
