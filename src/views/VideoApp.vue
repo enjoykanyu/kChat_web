@@ -19,6 +19,22 @@
 
       <!-- 进度条 -->
       <div class="progress-container">
+        <!-- 在video-info上方添加弹幕按钮 -->
+          <button class="danmaku-btn" @click="toggleDanmakuInput">弹</button>
+          <div class="video-info">
+            <!-- 原有信息 -->
+          </div>
+
+          <!-- 弹幕输入框 -->
+          <div v-if="showDanmakuInput" class="danmaku-input-box">
+            <input
+                v-model="danmakuText"
+                placeholder="输入弹幕内容"
+                @keyup.enter="sendDanmaku"
+            >
+            <button @click="sendDanmaku">发送</button>
+          </div>
+
         <div class="video-info">
           <h3>@{{ currentVideo.author }}</h3>
           <p>{{ currentVideo.title }}</p>
@@ -401,27 +417,27 @@ const toggleFollow = () => {
 }
 
 // 弹幕逻辑
-const visibleDanmus = computed(() => {
-  const currentTime = videoElement.value?.currentTime || 0
-  return danmakuList.filter(d =>
-      d.time <= currentTime &&
-      d.time + d.duration > currentTime
-  )
-})
+// const visibleDanmus = computed(() => {
+//   const currentTime = videoElement.value?.currentTime || 0
+//   return danmakuList.filter(d =>
+//       d.time <= currentTime &&
+//       d.time + d.duration > currentTime
+//   )
+// })
 
-const sendDanmaku = () => {
-  if (newDanmaku.value.trim()) {
-    danmakuList.push({
-      id: Date.now(),
-      text: newDanmaku.value,
-      position: Math.random() * 80 + 10,
-      duration: 5,
-      time: videoElement.value?.currentTime || 0
-    })
-    newDanmaku.value = ''
-    showDanmakuInput.value = false
-  }
-}
+// const sendDanmaku = () => {
+//   if (newDanmaku.value.trim()) {
+//     danmakuList.push({
+//       id: Date.now(),
+//       text: newDanmaku.value,
+//       position: Math.random() * 80 + 10,
+//       duration: 5,
+//       time: videoElement.value?.currentTime || 0
+//     })
+//     newDanmaku.value = ''
+//     showDanmakuInput.value = false
+//   }
+// }
 
 // 视频容器Ref
 const videoContainer = ref<HTMLElement>()
@@ -543,7 +559,57 @@ onMounted(() => {
   }
 })
 // 增加
+// 弹幕数据
+// const showDanmakuInput = ref(false)
+const danmakuText = ref('')
+const visibleDanmus = ref([
+  // 虚拟数据示例
+  { id: 1, text: '前方高能！', position: 15, duration: 8 },
+  { id: 2, text: '经典名场面', position: 30, duration: 6 }
+])
 
+// 获取视频实例
+// const videoElement = ref(null)
+
+// 切换输入框显示
+const toggleDanmakuInput = () => {
+  showDanmakuInput.value = !showDanmakuInput.value
+}
+
+// 发送弹幕逻辑
+const sendDanmaku = () => {
+  if (!danmakuText.value.trim()) return
+
+  visibleDanmus.value.push({
+    id: Date.now(),
+    text: danmakuText.value,
+    position: getCurrentVideoPosition(),
+    duration: calculateDuration(danmakuText.value)
+  })
+
+  danmakuText.value = ''
+  showDanmakuInput.value = false
+}
+
+// 计算弹幕出现位置（基于当前播放进度）
+const getCurrentVideoPosition = () => {
+  if (!videoElement.value) return 10 // 默认顶部10%位置
+  const progress = (videoElement.value.currentTime / videoElement.value.duration) * 100
+  return Math.min(Math.max(progress, 5), 95) // 限制在5%-95%区间
+}
+
+// // 根据文本长度计算动画时长
+// const calculateDuration = (text) => {
+//   const baseSpeed = 100 // 像素/秒
+//   const textWidth = text.length * 14 // 估算字符宽度
+//   return (window.innerWidth + textWidth) / baseSpeed
+// }
+// 修改后的持续时间计算
+const calculateDuration = (text) => {
+  const baseSpeed = 150 // 提高移动速度（像素/秒）
+  const textWidth = text.length * 14 // 保持字符宽度估算
+  return (window.innerWidth + textWidth) / baseSpeed
+}
 </script>
 
 <style scoped>
@@ -726,8 +792,24 @@ video {
 
 /* 视频信息优化 */
 .video-info {
+  /* 基础样式 */
   color: white;
   margin-bottom: 12px;
+
+  /* 对齐控制 */
+  text-align: left;
+  align-self: flex-start; /* 如果父级是flex布局 */
+
+  /* 内容宽度控制 */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  /* 内部元素间距 */
+  & h3, & p, & .tags {
+    margin-left: 0;
+    margin-right: auto; /* 保持左对齐惯性 */
+  }
 }
 
 .video-info h3 {
@@ -1116,5 +1198,67 @@ video {
     opacity: 0.4;
   }
 }
+/* 弹幕按钮样式 */
+.danmaku-btn {
+  position: absolute;
+  left: 12px;
+  top: -36px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.5);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  opacity: 0.8;
+  transition: all 0.3s;
+  z-index: 1001;
+}
 
+/* 输入框样式 */
+.danmaku-input-box {
+  position: absolute;
+  left: 60px;
+  top: -40px;
+  background: rgba(0,0,0,0.8);
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  gap: 8px;
+
+  input {
+    background: transparent;
+    border: 1px solid #666;
+    color: white;
+    padding: 4px 8px;
+    width: 200px;
+  }
+
+  button {
+    background: #00aeec;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+}
+
+/* 弹幕动画 */
+.danmu {
+  position: absolute;
+  white-space: nowrap;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  animation: danmaku-scroll linear forwards;
+  font-size: 14px;
+  left: 100%;       /* 从屏幕右侧外开始 */
+}
+
+@keyframes danmaku-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 100vw)); /* 完全移出左侧 */
+  }
+}
 </style>
