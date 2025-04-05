@@ -1,29 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Login from '../views/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/value',
-      name: 'value',
-      props: true, // 使用 props 传递参数
-
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/value.vue'),
+      path: '/',
+      name: 'login',
+      component: Login
     },
     {
-      path: '/video',
-      name: 'video',
-      props: true, // 使用 props 传递参数
-
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/VideoApp.vue'),
+      path: '/chatIm',
+      name: 'chatIm',
+      component: () => import('../views/ChatIm.vue'),
     },
-  ],
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../views/ChatViewNew.vue'),
+      // props: true
+    }
+  ]
 })
 
 export default router

@@ -1,22 +1,28 @@
-// plugins/axios.ts
-import axios from 'axios';
-import { useUserStore } from '../store/token.ts';
+import axios from 'axios'
 
-const baseURL = '/api';
-const instance = axios.create({  })
+const instance = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    timeout: 10000
+})
 
+// 请求拦截器
 instance.interceptors.request.use(config => {
-    const userStore = useUserStore(); // 获取Pinia store实例
-    const token = sessionStorage.getItem("token"); // 从store获取token
+    const token = localStorage.getItem('token')
     if (token) {
-        config.headers['Authorization'] = token; // 设置请求头中的Authorization字段
-    }else {
-        console.log("未找到token")
+        config.headers.Authorization = `Bearer ${token}`
     }
-    console.log(333);
-    console.log()
-    return config;
-}, error => {
-    return Promise.reject(error);
-});
-export default instance;
+    return config
+})
+
+// 响应拦截器
+instance.interceptors.response.use(
+    response => response.data,
+    error => {
+        if (error.response?.status === 401) {
+            // 处理未授权
+        }
+        return Promise.reject(error)
+    }
+)
+
+export default instance
