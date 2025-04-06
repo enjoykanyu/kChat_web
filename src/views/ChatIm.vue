@@ -61,8 +61,67 @@
     <div class="left-side">
       <!-- Search input (moved outside) -->
       <div class="search-wrapper">
-        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>
+<!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
+        <el-input
+            v-model="searchUserName"
+            placeholder="回车搜索用户"
+            class="search-input"
+            @keydown.enter.native="searchUserForForm"
+            @input="handleSearchInput"
+            clearable
+        ></el-input>
       </div>
+      <!-- 搜索结果悬浮层 -->
+      <transition name="fade">
+        <el-scrollbar
+            v-show="showSearchResult"
+            class="user-list-scroll-search"
+            :class="{ 'search-active': showSearchResult }"
+        >
+          <el-row>
+            <el-col
+                :span="24"
+                v-for="form in searchMessageForm"
+                :key="form.recieiveUser.id"
+                @click.native="handleSelectUser(form.recieiveUser)"
+                class="user-item"
+            >
+              <!-- 用户项结构（同原有内容） -->
+              <div class="user-avatar-wrapper">
+                <!-- 方形头像 -->
+                <img
+                    :src="form.recieiveUser.avatar"
+                    class="user-avatar"
+                >
+
+                <!-- 未读消息徽章 -->
+                <el-badge
+                    :value="form.noReadMessageLength"
+                    v-if="form.noReadMessageLength > 0"
+                    class="message-badge"
+                />
+
+                <!-- 在线状态指示 -->
+                <div
+                    v-if="form.recieiveUser.isOnline"
+                    class="online-dot"
+                ></div>
+              </div>
+
+              <div class="user-details">
+                <div class="header-line">
+                  <div class="user-name">{{ form.recieiveUser.userName }}</div>
+                  <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
+                </div>
+                <div class="last-message">
+                  {{ form.lastMessage || "暂无消息" }}
+                </div>
+              </div>
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+      </transition>
+
       <!-- User list (with scroll) -->
       <el-scrollbar class="user-list-scroll">
         <el-row>
@@ -185,6 +244,7 @@ export default {
       loginUser: null,
       messages: [],
       messageForm: [], // 聊天所有信息
+      searchMessageForm: [], // 搜索聊天所有信息
       newMessage: {
         id: '',
         sendUser: '',
@@ -194,7 +254,8 @@ export default {
         createTime: '',
         updateTime: '',
       },
-      searchUserName: ''
+      searchUserName: '',
+      showSearchResult: false,
     }
   },
   created() {
@@ -325,9 +386,20 @@ export default {
         }
       }).then(res => {
         console.log(res)
-        this.messageForm = res.data.data;
-        console.log(this.messageForm)
+        this.showSearchResult = true
+        this.searchMessageForm = res.data.data;
+        console.log(this.searchMessageForm)
       })
+    },
+    handleSearchInput(val) {
+      if (!val) {
+        this.showSearchResult = false
+      }
+    },
+    handleSelectUser(user) {
+      this.chooseUser(user)
+      this.showSearchResult = false
+      this.searchUserName = ''
     },
 
     chooseUser (user) {
@@ -449,10 +521,27 @@ export default {
 
 .user-list-scroll {
   top: 40px;
+  overflow-y: auto;
+  height: calc(100% - 56px);
+  position: relative;
+  z-index: 1;
+
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+.search-active + .user-list-scroll {
+  filter: blur(1px);
+  pointer-events: none;
+}
+.user-list-scroll-search{
   height: calc(100% - 40px);
   overflow-y: auto;
 }
-
 .user-avatar-wrapper {
   position: relative;
   display: inline-block;
@@ -889,5 +978,16 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 240px;
+}
+.user-list-scroll-search {
+  position: absolute;
+  top: 56px; /* 根据搜索框高度调整 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+  transition: all 0.3s ease;
 }
 </style>
