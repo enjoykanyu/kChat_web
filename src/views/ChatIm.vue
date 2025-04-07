@@ -8,7 +8,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'profile' }"
-            @click="activeTab = 'profile'">
+            @click="updateTab('profile')">
           <el-avatar :size="32" :src="loginUser.avatar" />
         </div>
 
@@ -16,7 +16,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'message' }"
-            @click="activeTab = 'message'">
+            @click="updateTab('message')">
           <el-icon :size="26" class="nav-icon">
             <Message />
           </el-icon>
@@ -30,7 +30,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'contact' }"
-            @click="activeTab = 'contact'">
+            @click="updateTab('contact')">
           <el-icon :size="26" class="nav-icon">
             <User />
           </el-icon>
@@ -40,7 +40,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'moment' }"
-            @click="activeTab = 'moment'">
+            @click="updateTab('moment')">
           <el-icon :size="26" class="nav-icon">
             <Picture />
           </el-icon>
@@ -50,7 +50,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'settings' }"
-            @click="activeTab = 'settings'">
+            @click="updateTab('settings')">
           <el-icon :size="26" class="nav-icon">
             <Setting />
           </el-icon>
@@ -59,6 +59,46 @@
     </div>
     <!-- Left side: User list -->
     <div class="left-side">
+      <!-- 联系人 -->
+      <template v-if="activeTab === 'contact'">
+        <div class="contact-header">
+          <el-input
+              v-model="contactSearch"
+              placeholder="微信号/手机号"
+              class="contact-search-input"
+              clearable
+          >
+            <template #suffix>
+              <el-icon @click="handleAddContact">
+                <Plus />
+              </el-icon>
+            </template>
+          </el-input>
+        </div>
+
+        <el-scrollbar class="contact-list-scroll">
+          <!-- 新朋友固定按钮 -->
+          <div class="new-friend-item" @click="showNewFriendList">
+            <el-icon class="new-friend-icon">
+              <User />
+            </el-icon>
+            <span>新的朋友</span>
+          </div>
+
+          <!-- 联系人列表 -->
+          <div
+              v-for="contact in filteredContacts"
+              :key="contact.id"
+              class="contact-item"
+              @click="selectContact(contact)"
+          >
+            <img :src="contact.friendUser.avatar" class="contact-avatar" />
+            <span class="contact-name">{{ contact.friendUser.userName }}</span>
+          </div>
+        </el-scrollbar>
+      </template>
+      <template v-if="activeTab === 'message'">
+
       <!-- Search input (moved outside) -->
       <div class="search-wrapper">
 <!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
@@ -127,45 +167,47 @@
         <el-row>
           <el-col
               :span="24"
-              v-for="form in messageForm"
-              :key="form.recieiveUser.id"
-              @click.native="chooseUser(form.recieiveUser)"
+              v-for="form in curAllMessage"
+              :key="form.user.id"
+              @click.native="chooseUser(form.receiver_user)"
               class="user-item"
               v-if="messageForm.length !== 0"
           >
             <div class="user-avatar-wrapper">
               <!-- 方形头像 -->
               <img
-                  :src="form.recieiveUser.avatar"
+                  :src="form.user.avatar"
                   class="user-avatar"
               >
 
               <!-- 未读消息徽章 -->
               <el-badge
-                  :value="form.noReadMessageLength"
-                  v-if="form.noReadMessageLength > 0"
+                  :value="form.user.unread"
+                  v-if="form.user.unread > 0"
                   class="message-badge"
               />
 
-              <!-- 在线状态指示 -->
-              <div
-                  v-if="form.recieiveUser.isOnline"
-                  class="online-dot"
-              ></div>
+<!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
+<!--              <div-->
+<!--                  v-if="form.recieiveUser.isOnline"-->
+<!--                  class="online-dot"-->
+<!--              ></div>-->
             </div>
 
             <div class="user-details">
               <div class="header-line">
-                <div class="user-name">{{ form.recieiveUser.userName }}</div>
-                <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
+                <div class="user-name">{{ form.receiver_user.userName }}</div>
+                <div class="message-time">{{ formatTime(form.time) }}</div>
               </div>
               <div class="last-message">
-                {{ form.lastMessage || "暂无消息" }}
+                {{form.user.userName}}:
+                {{ form.cotnet || "暂无消息" }}
               </div>
             </div>
           </el-col>
         </el-row>
       </el-scrollbar>
+      </template>
     </div>
     <!-- Right side: Chat box -->
     <div class="right-side">
@@ -222,17 +264,20 @@ import {
 } from '@element-plus/icons-vue'
 
 // 状态管理
-const activeTab = ref('message') // 当前激活的tab
+// const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
 
 // 用户数据
-const loginUser = ref({
-  avatar: 'https://example.com/avatar.jpg'
-})
+// const loginUser = ref({
+//   avatar: 'https://example.com/avatar.jpg'
+// })
 export default {
   name: "Im",
   data() {
     return {
+      filteredContacts:[],
+      contactSearch:'',
+      activeTab:"message",
       circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
       user: {},
       isCollapse: false,
@@ -244,6 +289,7 @@ export default {
       loginUser: null,
       messages: [],
       messageForm: [], // 聊天所有信息
+      curAllMessage: [], // 当前用户聊天所有信息根据消息发送时间倒序排序
       searchMessageForm: [], // 搜索聊天所有信息
       newMessage: {
         id: '',
@@ -265,6 +311,7 @@ export default {
 
   mounted() {
     this.scrollToBottom()
+    this.searchUserMessage()//默认进入网页当前为消息页
   },
   beforeCreate () {
     axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
@@ -304,7 +351,23 @@ export default {
       ]
       return messages[Math.floor(Math.random() * messages.length)]
     },
-
+    updateTab(tab){
+      this.activeTab = tab
+      console.log(this.activeTab)
+      if (this.activeTab === "contact") {
+        this.searchAllFriends()
+      }else if (this.activeTab === "message") {
+        this.searchUserMessage()
+      }
+    },
+    //搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
+    searchAllFriends(){
+      axios.get("api/friends/all").then(res => {
+        console.log(res)
+        this.filteredContacts = res.data;
+        console.log(this.filteredContacts)
+      })
+    },
     formatTime(timestamp) {
       const date = new Date(timestamp)
       const hours = date.getHours().toString().padStart(2, '0')
@@ -345,6 +408,7 @@ export default {
           console.log(res)
           console.log(this.currentUser)
           this.chooseUser(this.currentUser)
+          this.searchUserMessage() //更新当前最新消息
         })
         }
 
@@ -389,6 +453,16 @@ export default {
         this.showSearchResult = true
         this.searchMessageForm = res.data.data;
         console.log(this.searchMessageForm)
+      })
+    },
+    //搜索当前用户发过的消息和接受到的消息，根据最后一条消息时间倒序排序
+    searchUserMessage(){
+      axios.get("api/chat/allChatUser").then(res => {
+        console.log(res)
+        this.curAllMessage = res.data.data;
+        // this.showSearchResult = true
+        // this.searchMessageForm = res.data.data;
+        // console.log(this.searchMessageForm)
       })
     },
     handleSearchInput(val) {
@@ -476,6 +550,8 @@ export default {
             }).then(res => {
               this.messages = res.data.data[0].chatContents
               console.log(this.messages)
+              //浏览器接受服务端返回的消息 接收方更新消息列表
+              this.searchUserMessage()
               // 将聊天记录总下拉到最下方
               this.$nextTick(() => {
                 this.scrollToBottom()
@@ -989,5 +1065,63 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 2;
   transition: all 0.3s ease;
+}
+
+.contact-header {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.contact-search-input {
+  width: 100%;
+}
+
+.contact-search-input .el-icon {
+  cursor: pointer;
+  color: #409eff;
+}
+
+.contact-list-scroll {
+  height: calc(100% - 60px);
+}
+
+.new-friend-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.new-friend-item:hover {
+  background-color: #f5f5f5;
+}
+
+.new-friend-icon {
+  margin-right: 10px;
+  font-size: 20px;
+  color: #409eff;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.contact-item:hover {
+  background-color: #f5f5f5;
+}
+
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.contact-name {
+  font-size: 14px;
 }
 </style>
