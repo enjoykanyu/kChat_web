@@ -62,18 +62,117 @@
       <!-- 联系人 -->
       <template v-if="activeTab === 'contact'">
         <div class="contact-header">
-          <el-input
-              v-model="contactSearch"
-              placeholder="微信号/手机号"
-              class="contact-search-input"
-              clearable
-          >
-            <template #suffix>
-              <el-icon @click="handleAddContact">
-                <Plus />
-              </el-icon>
-            </template>
-          </el-input>
+          <!-- 搜索框区域 -->
+          <div class="search-box">
+            <el-input
+                v-model="contactSearch"
+                placeholder="微信号/手机号"
+                clearable
+                @keyup.enter.native="handleSearchUser"
+                class="search-input"
+            >
+              <i
+                  slot="suffix"
+                  class="el-icon-plus search-icon"
+                  @click="handleSearchUser"
+              ></i>
+            </el-input>
+
+            <!-- 搜索结果悬浮层 -->
+            <div
+                v-if="showResultLayer"
+                class="result-layer"
+            >
+              <div
+                  v-if="searchResult"
+                  class="user-item"
+                  @click="showUserCard(searchResult)"
+              >
+                <img :src="searchResult.avatar" class="contact-avatar" />
+                <div class="user-name">{{ searchResult.userName }}：</div>
+                <div class="user-phone">{{ searchResult.phone }}</div>
+              </div>
+              <div v-else class="empty-tip">
+                用户不存在
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户卡片弹窗 -->
+          <div v-if="showUserDialog" class="dialog-mask">
+            <div class="user-card">
+              <div v-if="!showAddFriendForm" class="main-content">
+                <!-- 关闭按钮 -->
+                <div class="close-btn" @click="closeDialog">×</div>
+
+                <!-- 用户信息区域 -->
+                <div class="card-header">
+                  <img :src="currentSearchUser.avatar" class="contact-avatar" />
+                  <div class="user-info">
+                    <h3>{{ currentSearchUser.userName }}</h3>
+                    <p class="signature">{{ currentSearchUser.signature || '暂无个性签名' }}</p>
+                  </div>
+                </div>
+
+                <!-- 详细信息 -->
+                <div class="detail-section">
+                  <div class="detail-item">
+                    <span>手机号</span>
+                    <span>{{ currentSearchUser.phone}}</span>
+                  </div>
+                  <div v-if="isFriend" class="detail-item">
+                    <span>朋友圈</span>
+                    <span>{{ currentSearchUser.moments || 0 }}条动态</span>
+                  </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                  <template v-if="isFriend">
+                    <button class="btn primary">发消息</button>
+                    <button class="btn">视频通话</button>
+                    <button class="btn">语音通话</button>
+                  </template>
+                  <button v-else class="btn add-friend" @click="enterAddFriend">加好友</button>
+                </div>
+
+              </div>
+              <!-- 好友申请表单 -->
+              <div v-else class="friend-form">
+                <div class="form-header">
+                  <el-icon class="back-icon" @click="showAddFriendForm = false">
+                    <ArrowLeft />
+                  </el-icon>
+                  <h3>好友申请</h3>
+                </div>
+
+                <div class="form-body">
+                  <el-input
+                      v-model="applyReason"
+                      type="textarea"
+                      :rows="4"
+                      placeholder="请输入申请理由（最多50字）"
+                      maxlength="50"
+                      show-word-limit
+                      class="reason-input"
+                  />
+
+                  <div class="form-actions">
+                    <button
+                        class="btn submit-btn"
+                        :disabled="!applyReason"
+                        @click="handleSubmitApply"
+                    >
+                      发送申请
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
         </div>
 
         <el-scrollbar class="contact-list-scroll">
@@ -263,6 +362,7 @@ import {
   Setting
 } from '@element-plus/icons-vue'
 
+
 // 状态管理
 // const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
@@ -275,6 +375,12 @@ export default {
   name: "Im",
   data() {
     return {
+      showResultLayer : false,
+      searchResult:null,
+      showUserDialog : false,
+      showAddFriendForm : false,
+      applyReason : '',
+      isFriend : false,
       filteredContacts:[],
       contactSearch:'',
       activeTab:"message",
@@ -286,6 +392,7 @@ export default {
       text: "",
       content: '',
       currentUser: null, // 当前聊天的人
+      currentSearchUser: null, // 当前搜索的用户
       loginUser: null,
       messages: [],
       messageForm: [], // 聊天所有信息
@@ -340,7 +447,103 @@ export default {
         lastMessageTime: Date.now() - Math.random() * 86400000
       }))
     },
+    /*
+    * 搜索用户*/
+    // handleSearchUser(){
+    //
+    // },
+    handleAddContact(){
 
+    },
+    // 手机号脱敏处理
+    // maskPhone(phone) {
+    //   phone= phone.replace(/(\d{3})\d{4}(\d{4})/, '$1&zwnj;****&zwnj;$2');
+    // }
+
+    // 搜索用户
+    handleSearchUser() {
+      if (!this.contactSearch.trim()) return;
+
+      try {
+        // 模拟API调用
+        const res = axios.get("api/friends/search/user",{
+              params:{"phone":this.contactSearch}
+            }
+        ).then(res => {
+          if (res.data.code === 200) {
+            this.searchResult = res.data.data;
+            this.showResultLayer = true;
+            console.log(this.searchResult);
+          }else {
+          }
+          console.log(res)
+        })
+      } catch (error) {
+        this.searchResult = null;
+        this.showResultLayer = true;
+      }
+    },
+
+    // 显示用户卡片
+    showUserCard(user) {
+      this.currentSearchUser = user;
+      this.showResultLayer = false;
+
+      // 检查好友状态
+      // try {
+      //   const res =  this.$http.get(`/api/friend-status/${user.id}`);
+      //   this.isFriend = res.data.isFriend;
+        //请求查看当前搜索用户是否为当前用户的好友
+      this.showUserDialog = true
+      axios.post("api/friends/search/isFriend", this.currentSearchUser
+
+      ).then(res => {
+        if (res.data.code === 200) {
+          this.isFriend = true
+        }else {
+          this.isFriend = false
+        }
+        console.log(res)
+      })
+    // } catch (error) {
+    //   this.searchResult = null;
+    //   this.showResultLayer = true;
+    // }
+      // } catch (error) {
+      //   console.error('获取好友状态失败');
+      // }
+    },
+
+    // 关闭弹窗
+    closeDialog() {
+      this.showUserDialog = false;
+      this.currentSearchUser = {};
+    },
+
+
+
+
+
+    // 提交好友申请
+    handleSubmitApply() {
+      try {
+        axios.post('/api/friend-apply', {
+          applyUserId: this.currentSearchUser.id,
+          reason:this.applyReason,
+        });
+
+        this.$message.success('好友申请已发送');
+        this.showAddFriendForm = false;
+      } catch (error) {
+        this.$message.error('发送失败，请重试');
+      }
+    },
+
+    // 进入好友申请表单
+    enterAddFriend() {
+      this.showAddFriendForm = true;
+      this.applyReason = '';
+    },
     generateMockMessage() {
       const messages = [
         '你好，今天有空吗？',
@@ -1123,5 +1326,270 @@ export default {
 
 .contact-name {
   font-size: 14px;
+}
+/* 弹窗蒙层 - 确保位于最顶层 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px); /* 添加毛玻璃效果 */
+}
+
+/* 卡片容器 */
+.user-card {
+  overflow: hidden;
+  position: relative;
+  width: 480px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: cardEnter 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+/* 入场动画 */
+@keyframes cardEnter {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 关闭按钮增强 */
+.close-btn {
+  z-index: 1;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  background: #f5f5f5;
+  transform: rotate(90deg);
+}
+
+.close-btn::before {
+  //content: "×";
+  font-size: 24px;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.close-btn:hover::before {
+  color: #666;
+}
+
+/* 用户信息区域 */
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f0f2f5;
+  margin-right: 16px;
+  overflow: hidden;
+}
+
+.user-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.signature {
+  color: #909399;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 240px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 详细信息区域 */
+.detail-section {
+  margin: 24px 0;
+  padding: 16px 0;
+  border-top: 1px solid #ebedf0;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 14px;
+}
+
+.detail-item span:first-child {
+  color: #909399;
+  min-width: 72px;
+}
+
+.detail-item span:last-child {
+  color: #303133;
+  font-weight: 500;
+}
+
+/* 操作按钮优化 */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn.primary {
+  background: #409eff;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #66b1ff;
+}
+
+.btn:not(.primary) {
+  background: #f5f5f5;
+  color: #606266;
+}
+
+.btn:not(.primary):hover {
+  background: #e5e5e5;
+}
+
+.btn.add-friend {
+  background: #67c23a;
+  color: white;
+  width: 100%;
+}
+
+.btn.add-friend:hover {
+  background: #85ce61;
+}
+
+/* 响应式处理 */
+@media (max-width: 480px) {
+  .user-card {
+    width: 90%;
+    min-width: 300px;
+    padding: 20px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* 新增样式 */
+.friend-form {
+  padding: 20px;
+}
+
+.form-header {
+  position: relative;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+}
+
+.back-icon {
+  font-size: 20px;
+  color: #606266;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 15px;
+}
+
+.back-icon:hover {
+  color: #409EFF;
+  transform: translateX(-3px);
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #303133;
+}
+
+.reason-input textarea {
+  resize: none;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.reason-input textarea:focus {
+  border-color: #409EFF;
+}
+
+.form-actions {
+  margin-top: 25px;
+  text-align: right;
+}
+
+.submit-btn {
+  background: #67C23A;
+  color: white;
+  padding: 10px 30px;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  background: #EBEEF5;
+  color: #C0C4CC;
+  cursor: not-allowed;
+}
+/* 保持原有样式的基础上增加过渡效果 */
+.main-content,
+.friend-form {
+  transition: all 0.3s ease;
 }
 </style>
