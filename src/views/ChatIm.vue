@@ -207,6 +207,61 @@
             <span class="contact-name">{{ contact.friendUser.userName }}</span>
           </div>
         </el-scrollbar>
+
+        <!-- 新好友弹窗组件 -->
+        <!-- 申请列表弹窗 -->
+        <div v-if="showDialog" class="dialog-mask">
+          <div class="user-card"> @click="closeDialog"></div>
+333
+          <div class="dialog-content">
+            <h3 class="dialog-title">好友申请</h3>
+
+            <div class="application-list">
+              <div
+                  v-for="(item, index) in friendApplications"
+                  :key="index"
+                  class="application-item"
+              >
+                <div class="user-avatar">
+                  <img :src="item.applyUser.avatar" alt="avatar" />
+                </div>
+
+                <div class="user-info">
+                  <div class="name-row">
+                    <span class="username">{{ item.applyUser.userName }}</span>
+                    <span class="wechat-id">微信号：{{ item.applyUser.phone}}</span>
+                  </div>
+                  <p class="apply-reason">{{ item.reason }}</p>
+                </div>
+
+                <div class="action-buttons">
+<!--                  v-if="item.status === 'pending'"-->
+                  <button
+                      class="btn accept"
+                      @click="handleResponse(item, 'accept')"
+                  >
+                    同意
+                  </button>
+<!--                  v-if="item.status === 'pending'"-->
+                  <button
+                      class="btn reject"
+                      @click="handleResponse(item, 'reject')"
+                  >
+                    拒绝
+                  </button>
+<!--                  v-else-->
+<!--                  :class="['status-tag', item.status]"-->
+                  <span
+                      :class="['status-tag']"
+                  >
+                {{ item.status === 'accepted' ? '已通过' : '已拒绝' }}
+              </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </template>
       <template v-if="activeTab === 'message'">
 
@@ -531,7 +586,13 @@ export default {
       //   console.error('获取好友状态失败');
       // }
     },
+    //展示所有的用户申请列表
+    showNewFriendList(){
+      this.getAllRequests()
+        //新好友列表弹窗
+      this.showDialog = true
 
+    },
     // 关闭弹窗
     closeDialog() {
       this.showUserDialog = false;
@@ -545,9 +606,11 @@ export default {
     // 提交好友申请
     handleSubmitApply() {
       try {
-        axios.post('/api/friend-apply', {
+        axios.post('/api/friends/friend-apply', {
           applyUserId: this.currentSearchUser.id,
           reason:this.applyReason,
+        }).then(res => {
+          console.log(res)
         });
 
         this.$message.success('好友申请已发送');
@@ -792,21 +855,36 @@ export default {
             console.log("收到数据====" + msg.data)
             console.log(typeof msg.data)
             var data_new = JSON.parse(msg.data);
-            console.log(data_new);
-            axios.get("api/chat/oneChat",{
-              params:{"sendUserId":data_new.receiveUserId,
-                "receiveUserId":data_new.sendUserId
-              }
-            }).then(res => {
-              this.messages = res.data.data[0].chatContents
-              console.log(this.messages)
-              //浏览器接受服务端返回的消息 接收方更新消息列表
-              this.searchUserMessage()
-              // 将聊天记录总下拉到最下方
-              this.$nextTick(() => {
-                this.scrollToBottom()
+            const type = data_new.type //收到消息类型 2 用户之间发送的消息 1 好友之前处理消息
+            console.log(type)
+            if (type === 2){
+              console.log(data_new);
+              axios.get("api/chat/oneChat",{
+                params:{"sendUserId":data_new.receiveUserId,
+                  "receiveUserId":data_new.sendUserId
+                }
+              }).then(res => {
+                this.messages = res.data.data[0].chatContents
+                console.log(this.messages)
+                //浏览器接受服务端返回的消息 接收方更新消息列表
+                this.searchUserMessage()
+                // 将聊天记录总下拉到最下方
+                this.$nextTick(() => {
+                  this.scrollToBottom()
+                })
               })
-            })
+            }else if(type === 1){ //处理用户之前请求好友关系
+                setTimeout(() => {
+                  this.$message.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
+                  this.$message.success('验证理由'+data_new.content);
+                }, 3000)
+              //1，更新用户处理中的好友数量 数量=/requests/all/getPending.length
+                this.getAllPending()
+              //2，用户新的朋友列表请求所有的请求的朋友列表，通过或者拒绝的好友右边显示状态和理由 未处理过的显示通过和拒绝按钮
+              //3，用户点击同意 发送消息给服务端同意 同时把消息存储进消息db 新建一条“通过了您的好友”消息 同时消息列表更新
+            }
+
+
           };
           //关闭事件
           socket.onclose = function () {
@@ -1387,6 +1465,9 @@ export default {
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(3px); /* 添加毛玻璃效果 */
+
+  right: 0;
+  bottom: 0;
 }
 
 /* 卡片容器 */
@@ -1638,5 +1719,140 @@ export default {
 .main-content,
 .friend-form {
   transition: all 0.3s ease;
+}
+
+/* 新好友列表弹窗弹窗内容 */
+.dialog-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  z-index: 333;
+}
+
+.dialog-title {
+  padding: 16px;
+  margin: 0;
+  border-bottom: 1px solid #ebeef5;
+  font-size: 16px;
+  color: #303133;
+}
+
+/* 申请列表 */
+.application-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* 单个申请项 */
+.application-item {
+  display: flex;
+  padding: 12px 16px;
+  transition: background 0.3s;
+}
+
+.application-item:hover {
+  background: #fafafa;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.name-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.username {
+  font-size: 14px;
+  color: #303133;
+  margin-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wechat-id {
+  font-size: 12px;
+  color: #909399;
+}
+
+.apply-reason {
+  margin: 0;
+  font-size: 12px;
+  color: #606266;
+  line-height: 1.5;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  flex-shrink: 0;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.btn {
+  padding: 6px 12px;
+  margin-left: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+
+.btn.accept {
+  background: #67c23a;
+  color: white;
+}
+
+.btn.accept:hover {
+  background: #5daf34;
+}
+
+.btn.reject {
+  background: #f56c6c;
+  color: white;
+}
+
+.btn.reject:hover {
+  background: #e65050;
+}
+
+.status-tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status-tag.accepted {
+  color: #67c23a;
+  background: #f0f9eb;
+}
+
+.status-tag.rejected {
+  color: #f56c6c;
+  background: #fef0f0;
 }
 </style>
