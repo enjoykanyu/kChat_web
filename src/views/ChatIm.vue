@@ -33,6 +33,12 @@
             @click="updateTab('contact')">
           <el-icon :size="26" class="nav-icon">
             <User />
+            <!-- 未读消息徽章 -->
+            <el-badge
+                :value="unreadApply"
+                v-if="3 > 0"
+                class="message-badge"
+            />
           </el-icon>
         </div>
 
@@ -180,8 +186,14 @@
           <div class="new-friend-item" @click="showNewFriendList">
             <el-icon class="new-friend-icon">
               <User />
+              <el-badge
+                  :value="unreadApply"
+                  v-if="3 > 0"
+                  class="message-badge"
+              />
             </el-icon>
-            <span>新的朋友</span>
+            <span>新的朋友<!-- 未读消息徽章 -->
+            </span>
           </div>
 
           <!-- 联系人列表 -->
@@ -375,6 +387,11 @@ export default {
   name: "Im",
   data() {
     return {
+      friendApplications:[], //申请好友列表
+      showDialog: false, // 好友申请控制弹窗显示
+      unreadMessage: 0, //所有的未读消息数量
+      unreadApply:0, //所有的未处理的好友申请数量
+      unreadMoment:0,//所有的未看过的朋友圈数量
       showResultLayer : false,
       searchResult:null,
       showUserDialog : false,
