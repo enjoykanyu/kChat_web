@@ -436,6 +436,7 @@ export default {
   mounted() {
     this.scrollToBottom()
     this.searchUserMessage()//默认进入网页当前为消息页
+    this.getAllPending() //查看当前未处理的好友数量
   },
   beforeCreate () {
     axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
@@ -713,6 +714,35 @@ export default {
           this.$nextTick(() => {
             this.scrollToBottom()
           })
+      })
+    },
+    //获取所有的好友请求
+    getAllRequests(userId) {
+      axios.get("api/friends/requests/all",{
+        params:{"sendUserId":this.loginUser.id,
+          "receiveUserId":userId
+        }
+      }).then(res => {
+        console.log(res.data)
+        this.friendApplications = res.data
+      })
+    },
+    //获取所有未处理的好友请求
+    getAllPending(userId) {
+      axios.get("api/friends/requests/all/getPending",{
+        params:{"sendUserId":this.loginUser.id,
+          "receiveUserId":userId
+        }
+      }).then(res => {
+        // this.messages = res.data.data[0].chatContents
+        // console.log(this.messages)
+        // // 将聊天记录总下拉到最下方
+        // this.$nextTick(() => {
+        //   this.scrollToBottom()
+        // })
+        console.log(res.data)
+        this.unreadApply = res.data.length
+        console.log(this.unreadApply)
       })
     },
     // 消息过多的时候滚动到最新消息位置
