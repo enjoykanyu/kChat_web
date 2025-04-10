@@ -211,9 +211,10 @@
         <!-- 新好友弹窗组件 -->
         <!-- 申请列表弹窗 -->
         <div v-if="showDialog" class="dialog-mask">
-          <div class="user-card"> @click="closeDialog"></div>
-333
+<!--          <div class="user-card"> @click="closeDialog"></div>-->
+<!--333-->
           <div class="dialog-content">
+            <div class="close-btn" @click="closeApply">×</div>
             <h3 class="dialog-title">好友申请</h3>
 
             <div class="application-list">
@@ -222,7 +223,8 @@
                   :key="index"
                   class="application-item"
               >
-                <div class="user-avatar">
+                  <!--      点击可以查看用户信息          -->
+                <div class="user-avatar" @click="">
                   <img :src="item.applyUser.avatar" alt="avatar" />
                 </div>
 
@@ -238,14 +240,14 @@
 <!--                  v-if="item.status === 'pending'"-->
                   <button
                       class="btn accept"
-                      @click="handleResponse(item, 'accept')"
+                      @click="handleApply(item.applyUser.id,true)"
                   >
                     同意
                   </button>
 <!--                  v-if="item.status === 'pending'"-->
                   <button
                       class="btn reject"
-                      @click="handleResponse(item, 'reject')"
+                      @click="handleApply(false)"
                   >
                     拒绝
                   </button>
@@ -593,7 +595,11 @@ export default {
       this.showDialog = true
 
     },
-    // 关闭弹窗
+    //关闭查看所有好友申请弹窗
+    closeApply(){
+      this.showDialog = false
+    },
+    // 关闭申请弹窗
     closeDialog() {
       this.showUserDialog = false;
       this.currentSearchUser = {};
@@ -808,6 +814,18 @@ export default {
         console.log(this.unreadApply)
       })
     },
+
+    /*同意和拒绝好友*/
+    handleApply(requestid,accept){
+      axios.put(`api/friends/requests/${requestid}?accept=${accept}`,{
+        "accept":accept,
+      }).then(res => {
+        console.log(res.data)
+        this.friendApplications = res.data
+        this.showDialog = false
+      })
+    },
+
     // 消息过多的时候滚动到最新消息位置
     scrollToBottom () {
       // 使用 $refs 来获取对消息容器的引用
@@ -882,6 +900,13 @@ export default {
                 this.getAllPending()
               //2，用户新的朋友列表请求所有的请求的朋友列表，通过或者拒绝的好友右边显示状态和理由 未处理过的显示通过和拒绝按钮
               //3，用户点击同意 发送消息给服务端同意 同时把消息存储进消息db 新建一条“通过了您的好友”消息 同时消息列表更新
+            }else if(type === 3){
+
+              this.searchUserMessage()
+              this.updateTab('message')
+              //发送请求得展示申请的情况
+              //接受者展示处理情况
+
             }
 
 
