@@ -237,26 +237,27 @@
                 </div>
 
                 <div class="action-buttons">
-<!--                  v-if="item.status === 'pending'"-->
+
                   <button
+                      v-if="item.status === 0"
                       class="btn accept"
                       @click="handleApply(item.applyUser.id,true)"
                   >
                     同意
                   </button>
-<!--                  v-if="item.status === 'pending'"-->
                   <button
+                      v-if="item.status === 0"
                       class="btn reject"
-                      @click="handleApply(false)"
+                      @click="handleApply(item.applyUser.id,false)"
                   >
                     拒绝
                   </button>
-<!--                  v-else-->
-<!--                  :class="['status-tag', item.status]"-->
+<!--                  :class="['status-tag']"-->
                   <span
-                      :class="['status-tag']"
+                      v-else
+                      :class="['status-tag', item.status]"
                   >
-                {{ item.status === 'accepted' ? '已通过' : '已拒绝' }}
+                {{ item.status === 1 ? '已通过' : '已拒绝' }}
               </span>
                 </div>
               </div>
