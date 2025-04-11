@@ -369,7 +369,9 @@
                 <div class="message-time">{{ formatTime(form.time) }}</div>
               </div>
               <div class="last-message">
-                {{form.user.userName}}:
+                    <span :class="['username', { truncate: form.user.userName.length>6 }]">
+                {{form.user.userName}}
+                    </span>：
                 {{ form.cotnet || "暂无消息" }}
               </div>
             </div>
@@ -1407,7 +1409,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 240px;
+  /* 确保容器不会无限扩展 */
+  max-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .user-list-scroll-search {
   position: absolute;
@@ -1816,6 +1822,16 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.username.truncate {
+  display: inline-block;
+  max-width: 6em; /* 根据字体大小调整，6个中文字约为6em */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 
 .wechat-id {
