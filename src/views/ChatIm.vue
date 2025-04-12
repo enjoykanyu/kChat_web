@@ -268,123 +268,131 @@
       </template>
       <template v-if="activeTab === 'message'">
 
-      <!-- Search input (moved outside) -->
-      <div class="search-wrapper">
-<!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
-        <el-input
-            v-model="searchUserName"
-            placeholder="回车搜索用户"
-            class="search-input"
-            @keydown.enter.native="searchUserForForm"
-            @input="handleSearchInput"
-            clearable
-        ></el-input>
-      </div>
-      <!-- 搜索结果悬浮层 -->
-      <transition name="fade">
-        <el-scrollbar
-            v-show="showSearchResult"
-            class="user-list-scroll-search"
-            :class="{ 'search-active': showSearchResult }"
-        >
-          <el-row>
-            <el-col
-                :span="24"
-                v-for="form in searchMessageForm"
-                :key="form.recieiveUser.id"
-                @click.native="handleSelectUser(form.recieiveUser)"
-                class="user-item"
-            >
-              <!-- 用户项结构（同原有内容） -->
-              <div class="user-avatar-wrapper">
-                <!-- 方形头像 -->
-                <img
-                    :src="form.recieiveUser.avatar"
-                    class="user-avatar"
+<!--        搜索框和消息加上统一容器-->
+        <div class="left-chat-container">
+
+              <!-- Search input (moved outside) -->
+            <div class="search-wrapper">
+      <!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
+              <el-input
+                  v-model="searchUserName"
+                  placeholder="回车搜索用户"
+                  class="search-input"
+                  @keydown.enter.native="searchUserForForm"
+                  @input="handleSearchInput"
+                  clearable
+              ></el-input>
+
+            </div>
+
+
+            <!-- User list (with scroll) -->
+            <el-scrollbar class="user-list-scroll">
+              <!-- 搜索结果悬浮层 -->
+              <transition name="fade">
+                <el-scrollbar
+                    v-show="showSearchResult"
+                    class="user-list-scroll-search"
+                    :class="{ 'search-active': showSearchResult }"
                 >
+                  <el-row>
+                    <el-col
+                        :span="24"
+                        v-for="form in searchMessageForm"
+                        :key="form.recieiveUser.id"
+                        @click.native="handleSelectUser(form.recieiveUser)"
+                        class="user-item"
+                    >
+                      <!-- 用户项结构（同原有内容） -->
+                      <div class="user-avatar-wrapper">
+                        <!-- 方形头像 -->
+                        <img
+                            :src="form.recieiveUser.avatar"
+                            class="user-avatar"
+                        >
 
-                <!-- 未读消息徽章 -->
-                <el-badge
-                    :value="form.noReadMessageLength"
-                    v-if="form.noReadMessageLength > 0"
-                    class="message-badge"
-                />
+                        <!-- 未读消息徽章 -->
+                        <el-badge
+                            :value="form.noReadMessageLength"
+                            v-if="form.noReadMessageLength > 0"
+                            class="message-badge"
+                        />
 
-                <!-- 在线状态指示 -->
-                <div
-                    v-if="form.recieiveUser.isOnline"
-                    class="online-dot"
-                ></div>
-              </div>
+                        <!-- 在线状态指示 -->
+                        <div
+                            v-if="form.recieiveUser.isOnline"
+                            class="online-dot"
+                        ></div>
+                      </div>
 
-              <div class="user-details">
-                <div class="header-line">
-                  <div class="user-name">{{ form.recieiveUser.userName }}</div>
-                  <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
-                </div>
-                <div class="last-message">
-                  {{ form.lastMessage || "暂无消息" }}
-                </div>
-              </div>
-            </el-col>
-          </el-row>
-        </el-scrollbar>
-      </transition>
+                      <div class="user-details">
+                        <div class="header-line">
+                          <div class="user-name">{{ form.recieiveUser.userName }}</div>
+                          <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
+                        </div>
+                        <div class="last-message">
+                          {{ form.lastMessage || "暂无消息" }}
+                        </div>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-scrollbar>
+              </transition>
+              <el-row>
+                <el-col
+                    :span="24"
+                    v-for="form in curAllMessage"
+                    :key="form.user.id"
+                    @click.native="chooseUser(form.receiver_user)"
+                    class="user-item"
+                    v-if="messageForm.length !== 0"
+                >
+                  <div class="user-avatar-wrapper">
+                    <!-- 方形头像 -->
+                    <img
+                        :src="form.user.avatar"
+                        class="user-avatar"
+                    >
 
-      <!-- User list (with scroll) -->
-      <el-scrollbar class="user-list-scroll">
-        <el-row>
-          <el-col
-              :span="24"
-              v-for="form in curAllMessage"
-              :key="form.user.id"
-              @click.native="chooseUser(form.receiver_user)"
-              class="user-item"
-              v-if="messageForm.length !== 0"
-          >
-            <div class="user-avatar-wrapper">
-              <!-- 方形头像 -->
-              <img
-                  :src="form.user.avatar"
-                  class="user-avatar"
-              >
+                    <!-- 未读消息徽章 -->
+                    <el-badge
+                        :value="form.user.unread"
+                        v-if="form.user.unread > 0"
+                        class="message-badge"
+                    />
 
-              <!-- 未读消息徽章 -->
-              <el-badge
-                  :value="form.user.unread"
-                  v-if="form.user.unread > 0"
-                  class="message-badge"
-              />
+      <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
+      <!--              <div-->
+      <!--                  v-if="form.recieiveUser.isOnline"-->
+      <!--                  class="online-dot"-->
+      <!--              ></div>-->
+                  </div>
 
-<!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
-<!--              <div-->
-<!--                  v-if="form.recieiveUser.isOnline"-->
-<!--                  class="online-dot"-->
-<!--              ></div>-->
-            </div>
+                  <div class="user-details">
+                    <div class="header-line">
+                      <div class="user-name">{{ form.receiver_user.userName }}</div>
+                      <div class="message-time">{{ formatTime(form.time) }}</div>
+                    </div>
+                    <div class="last-message">
+                          <span :class="['username', { truncate: form.user.userName.length>6 }]">
+                      {{form.user.userName}}
+                          </span>：
+                      {{ form.cotnet || "暂无消息" }}
+                    </div>
+                  </div>
+                </el-col>
+              </el-row>
+            </el-scrollbar>
+        </div>
 
-            <div class="user-details">
-              <div class="header-line">
-                <div class="user-name">{{ form.receiver_user.userName }}</div>
-                <div class="message-time">{{ formatTime(form.time) }}</div>
-              </div>
-              <div class="last-message">
-                    <span :class="['username', { truncate: form.user.userName.length>6 }]">
-                {{form.user.userName}}
-                    </span>：
-                {{ form.cotnet || "暂无消息" }}
-              </div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-scrollbar>
       </template>
     </div>
     <!-- Right side: Chat box -->
     <div class="right-side">
       <!-- Chat header -->
       <div class="chat-header">
-        <span v-if="currentUser">{{ currentUser.userName }}</span>
+        <span v-if="currentUser" class="username-wrap"
+              :class="{ 'long-name': currentUser.userName.length > 6 }">{{ currentUser.userName }}</span>
       </div>
       <!-- Chat messages -->
       <el-scrollbar class="chat-messages" ref="messageContainer">
@@ -935,6 +943,7 @@ export default {
 
 
 .left-side {
+  max-width: 370px;
   position: relative; /* Position relative for absolute positioning */
   flex: 1;
   padding: 20px;
@@ -948,7 +957,7 @@ export default {
   top: 20px;
   left: 20px;
   width: calc(100% - 40px);
-  max-width: 300px;
+  max-width: 370px;
 }
 
 .user-list-scroll {
@@ -970,10 +979,10 @@ export default {
   filter: blur(1px);
   pointer-events: none;
 }
-.user-list-scroll-search{
+/*.user-list-scroll-search{
   height: calc(100% - 40px);
   overflow-y: auto;
-}
+}*/
 .user-avatar-wrapper {
   position: relative;
   display: inline-block;
@@ -1008,12 +1017,12 @@ export default {
 
 
 
-.chat-header {
+/*.chat-header {
   padding: 20px;
   border-bottom: 1px solid #eaeaea;
   font-size: 1.2em;
   color: #37474F;
-}
+}*/
 
 .chat-messages {
   flex: 1;
@@ -1115,19 +1124,19 @@ export default {
 .chat-container {
   display: flex;
   height: 100vh;
-  min-width: 800px;
+  width: 1280px;
 }
 
-/* 左侧用户列表 */
+/*!* 左侧用户列表 *!
 .left-side {
   width: 280px;
   border-right: 1px solid #e5e5e5;
   display: flex;
   flex-direction: column;
-}
+}*/
 
 .search-wrapper {
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid #e5e5e5;
 }
 
@@ -1135,13 +1144,15 @@ export default {
   flex: 1;
   overflow: hidden;
 }
-
+/*
+ //min-width: 400px;
+ */
 /* 右侧聊天区域 */
 .right-side {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 400px;
+  width: 1330px;
 }
 
 /* 聊天头部 */
@@ -1151,6 +1162,7 @@ export default {
   background: #fafafa;
   font-size: 16px;
   font-weight: 500;
+  line-height: 1.5;
 }
 
 /* 消息区域 */
@@ -1306,23 +1318,23 @@ export default {
   right: -4px;
 }
 
-/* 调整左侧内容区 */
+/*!* 调整左侧内容区 *!
 .left-side {
   width: 280px;
   border-right: 1px solid #e5e5e5;
   display: flex;
   flex-direction: column;
-}
+}*/
 
 .sub-header {
   padding: 16px;
   font-weight: 500;
   border-bottom: 1px solid #e5e5e5;
 }
-.user-list-scroll {
+/*.user-list-scroll {
   height: 600px;
   --badge-size: 20px;
-}
+}*/
 
 .user-item {
   display: flex;
@@ -1417,7 +1429,7 @@ export default {
 }
 .user-list-scroll-search {
   position: absolute;
-  top: 56px; /* 根据搜索框高度调整 */
+  top: 3px; /* 根据搜索框高度调整 */
   left: 0;
   right: 0;
   bottom: 0;
@@ -1833,7 +1845,6 @@ export default {
   white-space: nowrap;
   vertical-align: bottom;
 }
-
 .wechat-id {
   font-size: 12px;
   color: #909399;
@@ -1897,4 +1908,49 @@ export default {
   color: #f56c6c;
   background: #fef0f0;
 }
+/*统一搜索框和消息长度*/
+/* 添加以下样式 */
+.left-chat-container {
+  width: 100%; /* 统一容器宽度 */
+  box-sizing: border-box;
+}
+
+/*.search-wrapper {
+  padding: 12px;
+  background: #fff;
+}*/
+
+.user-list-scroll {
+  height: 500px; /* 固定高度 */
+  width: 100%;
+
+  /* 统一滚动条样式 */
+  .el-scrollbar__wrap {
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+}
+
+/* 统一输入框样式 */
+.search-wrapper .el-input {
+  width: 100%;
+
+  .el-input__inner {
+    border-radius: 4px;
+    padding-right: 40px; /* 给清除按钮留空间 */
+  }
+}
+
+/* 统一用户项间距 */
+.user-item {
+  padding: 12px;
+  margin: 4px 0;
+  border-radius: 4px;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #f5f7fa;
+  }
+}
+
 </style>
