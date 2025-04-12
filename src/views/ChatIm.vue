@@ -274,19 +274,174 @@
               <!-- Search input (moved outside) -->
             <div class="search-wrapper">
       <!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
-              <el-input
+              <input
+                  type="text"
                   v-model="searchUserName"
                   placeholder="回车搜索用户"
                   class="search-input"
-                  @keydown.enter.native="searchUserForForm"
+                  @keydown.enter="searchUserForForm"
                   @input="handleSearchInput"
-                  clearable
-              ></el-input>
+              >
 
+              <!-- 新增独立图标按钮 -->
+              <button class="add-btn" @click="newChatGroup">+</button>
             </div>
 
+<!--          群聊弹窗按钮，后续再独立成单独的组件-->
+          <!-- 弹窗容器 -->
+<!--          <div v-if="showNewgroup" class="dialog-mask">-->
+<!--            <div class="dialog-wrapper">-->
+<!--              &lt;!&ndash; 标题栏 &ndash;&gt;-->
+<!--              <div class="dialog-header">-->
+<!--                <h3>发起群聊</h3>-->
+<!--                <span class="close-btn" @click="showDialog = false">×</span>-->
+<!--              </div>-->
 
-            <!-- User list (with scroll) -->
+<!--              &lt;!&ndash; 内容区 &ndash;&gt;-->
+<!--              <div class="dialog-body">-->
+<!--                &lt;!&ndash; 群聊名称输入 &ndash;&gt;-->
+<!--                <div class="input-group">-->
+<!--                  <label>群聊名称</label>-->
+<!--                  <input-->
+<!--                      v-model="groupName"-->
+<!--                      type="text"-->
+<!--                      placeholder="请输入群聊名称"-->
+<!--                      class="wechat-input"-->
+<!--                  >-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; 好友搜索选择 &ndash;&gt;-->
+<!--                <div class="input-group">-->
+<!--                  <label>添加成员</label>-->
+<!--                  <div class="search-wrapper">-->
+<!--                    <input-->
+<!--                        v-model="searchKey"-->
+<!--                        type="text"-->
+<!--                        placeholder="搜索好友"-->
+<!--                        class="wechat-input"-->
+<!--                        @input="filterFriends"-->
+<!--                    >-->
+<!--                    <div class="friend-list">-->
+<!--                      <div-->
+<!--                          v-for="friend in filteredContacts"-->
+<!--                          :key="friend.friendUser.id"-->
+<!--                          class="friend-item"-->
+<!--                      >-->
+<!--                        &lt;!&ndash; 复选框前置 &ndash;&gt;-->
+<!--                        <label class="checkbox-wrapper">-->
+<!--                          <input-->
+<!--                              type="checkbox"-->
+<!--                              v-model="selectedFriends"-->
+<!--                              :value="friend.friendUser.id"-->
+<!--                              class="wechat-checkbox"-->
+<!--                          >-->
+<!--                          <span class="checkmark"></span> &lt;!&ndash; 自定义样式层 &ndash;&gt;-->
+<!--                        </label>-->
+
+<!--                        <div class="user-avatar-wrapper">-->
+<!--                          &lt;!&ndash; 方形头像 &ndash;&gt;-->
+<!--                          <img-->
+<!--                              :src="friend.friendUser.avatar"-->
+<!--                              class="user-avatar"-->
+<!--                          >-->
+<!--                        </div>-->
+
+<!--                        <span>{{ friend.friendUser.userName }}</span>-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
+
+<!--              &lt;!&ndash; 操作按钮 &ndash;&gt;-->
+<!--              <div class="dialog-footer">-->
+<!--                <button class="cancel-btn" @click="showDialog = false">取消</button>-->
+<!--                <button class="confirm-btn" @click="createGroup">发起群聊</button>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--新实现-->
+          <div v-if="showNewgroup" class="dialog-mask">
+            <div class="dialog-wrapper wechat-style">
+              <!-- 对话框主体 -->
+              <div class="dialog-container">
+                <!-- 标题栏 -->
+                <div class="dialog-header">
+                  <h3 class="title">发起群聊</h3>
+                  <div class="close-btn" @click="showNewgroup = false">×</div>
+                </div>
+
+                <!-- 内容区（左右分栏） -->
+                <div class="dialog-body">
+                  <!-- 左侧好友列表 -->
+                  <div class="left-panel">
+                    <div class="search-box">
+                      <input
+                          type="text"
+                          placeholder="搜索"
+                          v-model="searchKey"
+                          class="wechat-search"
+                      >
+                    </div>
+                    <div class="friend-list">
+                      <div
+                          v-for="friend in filteredContacts"
+                          :key="friend.friendUser.id"
+                          class="friend-item"
+                          @click="toggleSelection(friend)"
+                      >
+                        <div class="selection-mark" v-show="isSelected(friend)">
+                          <div class="check-icon"></div>
+                        </div>
+                        <img :src="friend.friendUser.avatar" class="user-avatar">
+                        <div class="name">
+                          <span>{{ friend.friendUser.userName }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 右侧已选区域 -->
+                  <div class="right-panel">
+                    <div class="selected-header">
+                      <span class="text">已选（{{ selectedFriends.length }}）</span>
+                      <button class="clear-btn" @click="clearAll">清空</button>
+                    </div>
+
+                    <div class="selected-list">
+                      <div
+                          v-for="(friend, index) in selectedFriends"
+                          :key="index"
+                          class="selected-item"
+                      >
+                        <div class="avatar-wrapper">
+                          <img :src="friend.friendUser.avatar" class="user-avatar">
+                          <div class="remove-btn" @click.stop="removeFriend(index)">×</div>
+                        </div>
+                        <span class="name">{{ friend.friendUser.userName }}</span>
+                      </div>
+                    </div>
+
+                    <div class="group-input">
+                      <input
+                          type="text"
+                          v-model="groupName"
+                          placeholder="填写群聊名称（必填）"
+                          class="wechat-input"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="dialog-footer">
+                  <button class="wechat-btn cancel" @click="showNewgroup = false">取消</button>
+                  <button class="wechat-btn primary" @click="createGroup">完成</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- User list (with scroll) -->
             <el-scrollbar class="user-list-scroll">
               <!-- 搜索结果悬浮层 -->
               <transition name="fade">
@@ -342,44 +497,45 @@
                 <el-col
                     :span="24"
                     v-for="form in curAllMessage"
-                    :key="form.user.id"
-                    @click.native="chooseUser(form.receiver_user)"
+                    @click.native="chooseUser(form)"
                     class="user-item"
                     v-if="messageForm.length !== 0"
                 >
-                  <div class="user-avatar-wrapper">
+                    <div class="user-avatar-wrapper">
                     <!-- 方形头像 -->
                     <img
-                        :src="form.user.avatar"
+                        :src="form.avatar"
                         class="user-avatar"
                     >
 
                     <!-- 未读消息徽章 -->
                     <el-badge
-                        :value="form.user.unread"
-                        v-if="form.user.unread > 0"
+                        :value="form.unreadCount"
+                        v-if="form.unreadCount > 0"
                         class="message-badge"
                     />
 
-      <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
-      <!--              <div-->
-      <!--                  v-if="form.recieiveUser.isOnline"-->
-      <!--                  class="online-dot"-->
-      <!--              ></div>-->
+                    <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
+                    <!--              <div-->
+                    <!--                  v-if="form.recieiveUser.isOnline"-->
+                    <!--                  class="online-dot"-->
+                    <!--              ></div>-->
                   </div>
 
-                  <div class="user-details">
-                    <div class="header-line">
-                      <div class="user-name">{{ form.receiver_user.userName }}</div>
-                      <div class="message-time">{{ formatTime(form.time) }}</div>
-                    </div>
-                    <div class="last-message">
-                          <span :class="['username', { truncate: form.user.userName.length>6 }]">
-                      {{form.user.userName}}
+                    <div class="user-details">
+                      <div class="header-line">
+                        <div class="user-name">{{ form.chatName }}</div>
+                        <div class="message-time">{{ formatTime(form.lastSendTime) }}</div>
+                      </div>
+                      <div class="last-message">
+                          <span :class="['username', { truncate: form.chatName.length>6 }]">
+                      {{form.chatName}}
                           </span>：
-                      {{ form.cotnet || "暂无消息" }}
+                        {{ form.lastContent || "暂无消息" }}
+                      </div>
                     </div>
-                  </div>
+
+
                 </el-col>
               </el-row>
             </el-scrollbar>
@@ -396,12 +552,31 @@
       </div>
       <!-- Chat messages -->
       <el-scrollbar class="chat-messages" ref="messageContainer">
-        <div class="messageBox" v-for="message in messages" :key="message" :class="{ ownMessage: message.sendUserId === loginUser.id, otherMessage: message.sendUserId !== loginUser.id }">
-          <div><img :src="message.sendUserId === loginUser.id ? loginUser.avatar : currentUser.avatar" alt="" style="border: 1px solid #70c1fa;"></div>
-          <div class="messageContent">{{ message.message}}</div>
-          <div class="messageTime">{{ message.createTime }}</div>
-<!--          <div v-if=""></div>-->
+        <div v-if="messageType==0">
+          <div class="messageBox" v-for="message in messages" :key="message" :class="{ ownMessage: message.sendUserId === loginUser.id, otherMessage: message.sendUserId !== loginUser.id }">
+            <div><img :src="message.sendUserId === loginUser.id ? loginUser.avatar : currentUser.avatar" alt="" style="border: 1px solid #70c1fa;"></div>
+            <div class="messageContent">{{ message.message}}</div>
+            <div class="messageTime">{{ message.createTime }}</div>
+            <!--          <div v-if=""></div>-->
+          </div>
         </div>
+        <div v-if="messageType==1">
+
+          <div class="messageBox" v-for="message in groupMessages" :key="message" :class="{ ownMessage: message.userId === loginUser.id, otherMessage: message.userId !== loginUser.id }">
+            <div v-if="message.type==1">
+              <div class="messageContent">{{ message.content}}</div>
+              <div class="messageTime">{{ message.sendTime }}</div>
+            </div>
+            <div v-else>
+              <div><img :src="message.userId === loginUser.id ? loginUser.avatar : message.userAvatar" alt="" style="border: 1px solid #70c1fa;"></div>
+              <div class="messageContent">{{ message.content}}</div>
+              <div class="messageTime">{{ message.sendTime }}</div>
+            </div>
+            <!--          <div v-if=""></div>-->
+          </div>
+        </div>
+
+
       </el-scrollbar>
       <div class="chat-input">
         <el-input
@@ -455,6 +630,7 @@ export default {
   name: "Im",
   data() {
     return {
+      showNewgroup:false,
       friendApplications:[], //申请好友列表
       showDialog: false, // 好友申请控制弹窗显示
       unreadMessage: 0, //所有的未读消息数量
@@ -467,6 +643,7 @@ export default {
       applyReason : '',
       isFriend : false,
       filteredContacts:[],
+      selectedFriends:[],//新建群聊选择的好友
       contactSearch:'',
       activeTab:"message",
       circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
@@ -479,9 +656,11 @@ export default {
       currentUser: null, // 当前聊天的人
       currentSearchUser: null, // 当前搜索的用户
       loginUser: null,
-      messages: [],
+      messages: [], //单聊消息
+      groupMessages: [], //群聊消息
+      messageType:0,// 当前消息类型 0单来哦 1群聊
       messageForm: [], // 聊天所有信息
-      curAllMessage: [], // 当前用户聊天所有信息根据消息发送时间倒序排序
+      curAllMessage: [], // 当前用户聊天所有信息根据消息发送时间倒序排序加上群聊消息
       searchMessageForm: [], // 搜索聊天所有信息
       newMessage: {
         id: '',
@@ -499,6 +678,7 @@ export default {
   created() {
     this.init()
     this.initMockData()
+    this.searchAllFriends()
   },
 
   mounted() {
@@ -761,6 +941,7 @@ export default {
       axios.get("api/chat/allChatUser").then(res => {
         console.log(res)
         this.curAllMessage = res.data.data;
+        console.log(this.curAllMessage)
         // this.showSearchResult = true
         // this.searchMessageForm = res.data.data;
         // console.log(this.searchMessageForm)
@@ -772,16 +953,30 @@ export default {
       }
     },
     handleSelectUser(user) {
-      this.chooseUser(user)
+      const message = {
+        chatType: 0,
+        user: user
+      }
+      this.chooseUser(message)
       this.showSearchResult = false
       this.searchUserName = ''
     },
 
-    chooseUser (user) {
-      this.currentUser = user
-      this.fetchMessages(user.id)
+    chooseUser (message) {
+      console.log(message)
+      const type = message.chatType
+      if (type === 0){
+        this.messageType = 0 //设置当前类型为单聊消息 用于区分右侧消息内容
+        console.log(111)
+        this.currentUser = message.user
+        this.fetchMessages(message.user.id)
+      }else if(type === 1){
+        this.messageType = 1 //设置当前类型为单聊消息 用于区分右侧消息内容
+        this.fetchMessagesGroup(message.group)
+      }
+
     },
-    //更新消息列表
+    //更新消息列表单聊
     fetchMessages(userId) {
       axios.get("api/chat/oneChat",{
         params:{"sendUserId":this.loginUser.id,
@@ -794,6 +989,22 @@ export default {
           this.$nextTick(() => {
             this.scrollToBottom()
           })
+      })
+    },
+    //更新消息列表群聊
+    fetchMessagesGroup(group) {
+      console.log(group)
+      axios.get("api/chat/groupChat",{
+        params:{"groupId":group.groupId,
+        }
+      }).then(res => {
+        // this.messages = res.data.data[0].chatContents
+        console.log(res)
+        this.groupMessages = res.data.data
+        // 将聊天记录总下拉到最下方
+        // this.$nextTick(() => {
+        //   this.scrollToBottom()
+        // })
       })
     },
     //获取所有的好友请求
@@ -836,7 +1047,73 @@ export default {
         this.showDialog = false
       })
     },
+/*发起群聊*/
+    newChatGroup(){
+      this.searchAllFriends()
+      this.showNewgroup=true
+      console.log("333")
+      console.log(this.filteredContacts)
+      console.log(this.filteredContacts)
 
+    },
+
+    // 判断是否已选中
+    isSelected(friend) {
+      return this.selectedFriends.some(f =>
+          f.friendUser.id === friend.friendUser.id
+      );
+    },
+
+    // 切换选择状态
+    toggleSelection(friend) {
+      const index = this.selectedFriends.findIndex(f =>
+          f.friendUser.id === friend.friendUser.id
+      );
+      console.log(index, friend)
+      if (index > -1) {
+        this.selectedFriends.splice(index, 1);
+      } else {
+        this.selectedFriends.push(friend);
+      }
+    },
+    // 移除单个好友
+    removeFriend(index) {
+      this.selectedFriends.splice(index, 1);
+    },
+
+    // 清空所有选择
+    clearAll() {
+      this.selectedFriends = [];
+    },
+
+    // 创建群组
+    createGroup(){
+      if (!this.groupName) {
+        alert('请填写群聊名称');
+        return;
+      }
+      if (this.selectedFriends.length < 1) {
+        alert('请至少选择一位成员');
+        return;
+      }
+
+      const payload = {
+        groupName: this.groupName,
+        member: this.selectedFriends.map(f => f.friendUser)
+      };
+
+      // 调用API
+      console.log('提交数据:', payload);
+      this.$emit('create', payload);
+      axios.post("api/group/create",payload).then(res => {
+
+        console.log(res.data)
+      })
+      this.clearAll();
+      this.groupName = '';
+      //关闭弹窗
+      this.showNewgroup = false;
+    },
     // 消息过多的时候滚动到最新消息位置
     scrollToBottom () {
       // 使用 $refs 来获取对消息容器的引用
@@ -855,6 +1132,7 @@ export default {
     },
 
     init() {
+
       console.log(window.sessionStorage.getItem("user"))
       this.user = window.sessionStorage.getItem("user")
       if (this.user){
@@ -953,13 +1231,59 @@ export default {
 }
 
 .search-input {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: calc(100% - 40px);
+  flex: 1;
   max-width: 370px;
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
 }
 
+.search-input:focus {
+  outline: none;
+  border-color: #409EFF;
+  box-shadow: 0 0 4px rgba(64, 158, 255, 0.3);
+}
+
+.add-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: #909399;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 移除点击态边框 */
+.add-btn:focus,
+.add-btn:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;  /* 双重保障 ‌:ml-citation{ref="4,7" data="citationList"} */
+}
+
+/* 按钮悬停动画 */
+.add-btn:hover {
+  transform: scale(1.1);
+  color: #409EFF;
+}
+
+/*!* 移动端适配 *!
+@media (max-width: 768px) {
+  .search-wrapper {
+    padding: 8px;
+  }
+
+  .search-input {
+    max-width: none;
+  }
+}*/
 .user-list-scroll {
   top: 40px;
   overflow-y: auto;
@@ -1136,8 +1460,11 @@ export default {
 }*/
 
 .search-wrapper {
+  position: relative;
   padding: 12px;
   border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  gap: 8px; /* 元素间距 */
 }
 
 .user-list-scroll {
@@ -1953,4 +2280,580 @@ export default {
   }
 }
 
+/*发起群聊按钮图标*/
+.search-icon {
+  cursor: pointer;
+  padding: 8px;
+  color: #606266;
+  transition: color 0.3s;
+  left: 70px;
+}
+
+.search-icon:hover {
+  color: #409EFF;
+}
+
+
+/* 微信风格弹窗样式 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/*.dialog-wrapper {
+  width: 440px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}*/
+
+/*.dialog-header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}*/
+
+.close-btn {
+  cursor: pointer;
+  font-size: 24px;
+  color: #999;
+}
+
+/*.dialog-body {
+  padding: 20px;
+}*/
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.wechat-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.wechat-input:focus {
+  border-color: #07C160;
+  outline: none;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+
+
+/* 输入框聚焦时显示下拉 */
+.wechat-input:focus + .friend-list {
+  display: block; /* 纯CSS触发显示 ‌:ml-citation{ref="7" data="citationList"} */
+}
+
+/*.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  position: relative; !* 建立定位上下文 *!
+}*/
+
+.friend-item:hover {
+  background: #f5f5f5; /* 悬停反馈 ‌:ml-citation{ref="3,8" data="citationList"} */
+}
+
+.wechat-checkbox {
+  margin-right: 12px;
+  accent-color: #07C160; /* 复选框品牌色 ‌:ml-citation{ref="1" data="citationList"} */
+  opacity: 0; /* 隐藏原生控件 */
+  position: absolute;
+  width: 18px;
+  height: 18px;
+}
+.checkbox-wrapper {
+  position: relative;
+  margin-right: 12px;
+  z-index: 1; /* 确保层级高于头像 */
+}
+
+.checkmark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+/* 选中态样式 */
+.wechat-checkbox:checked + .checkmark {
+  background: #07C160 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxNiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNS42IDExLjhMMC40IDYuNiAxLjggNS4yIDUuNiA5IDE0LjIgMC40IDE1LjYgMS44IDUuNiAxMS44eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==') no-repeat center;
+  background-size: 12px;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dialog-footer {
+  padding: 16px;
+  text-align: right;
+  border-top: 1px solid #eee;
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 8px 24px;
+  border-radius: 4px;
+  margin-left: 12px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.confirm-btn {
+  background: #07C160;
+  color: white;
+  border: none;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.confirm-btn:hover {
+  opacity: 0.9;
+}
+
+
+
+
+
+
+
+.chat--group-container {
+  display: flex;
+  width: 800px;
+  height: 600px;
+  border: 1px solid #e5e5e5;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 左侧面板样式 */
+.left-panel {
+  width: 280px;
+  border-right: 1px solid #e5e5e5;
+}
+
+.search-box {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.search-group-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.friend-list {
+  height: calc(100% - 57px);
+  overflow-y: auto;
+}
+
+/*.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.friend-item:hover {
+  background-color: #f5f5f5;
+}*/
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.name {
+  font-size: 14px;
+  color: #333;
+}
+
+.check-mark {
+  position: absolute;
+  right: 15px;
+  color: #09bb07;
+  font-size: 18px;
+}
+
+/* 右侧面板样式 */
+.right-panel {
+  flex: 1;
+  padding: 16px;
+}
+
+.selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 14px;
+  color: #999;
+}
+
+.clear-btn {
+  color: #576b95;
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.selected-item {
+  width: 80px;
+  text-align: center;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.remove-icon {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  background: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.action-area {
+  border-top: 1px solid #e5e5e5;
+  padding-top: 16px;
+}
+
+.group-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 10px;
+  background: #07c160;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #06ad56;
+}
+
+
+/* 微信风格基础样式 */
+.wechat-style {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  color: #333;
+}
+
+/* 遮罩层 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.dialog-wrapper {
+  width: 680px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 标题栏 */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e5e5;
+
+  .title {
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .close-btn {
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    padding: 0 8px;
+
+    &:hover {
+      color: #666;
+    }
+  }
+}
+
+/* 内容区布局 */
+.dialog-body {
+  display: flex;
+  height: 420px;
+}
+
+/* 左侧面板 */
+.left-panel {
+  width: 280px;
+  border-right: 1px solid #e5e5e5;
+
+  .search-box {
+    padding: 16px;
+  }
+
+  .wechat-search {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    font-size: 14px;
+
+    &:focus {
+      border-color: #07c160;
+    }
+  }
+}
+
+.friend-list {
+  height: calc(100% - 64px);
+  overflow-y: auto;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-right: 12px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
+
+  .selection-mark {
+    position: absolute;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+
+    .check-icon {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 12px;
+      height: 6px;
+      border: 2px solid #07c160;
+      border-top: none;
+      border-right: none;
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+/* 右侧面板 */
+.right-panel {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .text {
+    color: #999;
+    font-size: 14px;
+  }
+
+  .clear-btn {
+    color: #576b95;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+.selected-list {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.selected-item {
+  width: 72px;
+  text-align: center;
+
+  .avatar-wrapper {
+    position: relative;
+    margin-bottom: 4px;
+
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 4px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: #ff4d4f;
+      color: white;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 18px;
+      cursor: pointer;
+    }
+  }
+
+  .name {
+    font-size: 12px;
+    color: #666;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+
+.group-input {
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+
+  .wechat-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    font-size: 14px;
+
+    &:focus {
+      border-color: #07c160;
+    }
+  }
+}
+
+/* 底部按钮 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid #e5e5e5;
+  .wechat-btn {
+    height: 36px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &.cancel {
+      background: #f5f5f5;
+      color: #666;
+
+      &:hover {
+        background: #eee;
+      }
+    }
+
+    &.primary {
+      background: #07c160;
+      color: white;
+
+      &:hover {
+        background: #06ad56;
+      }
+    }
+  }
+}
 </style>
