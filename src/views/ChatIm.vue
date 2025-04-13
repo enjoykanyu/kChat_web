@@ -857,22 +857,65 @@ export default {
     },
 
     send() {
-      if (!this.newMessage.content.trim()) {
-        this.$message.warning('请输入聊天内容')
-        return
-      }
-      this.newMessage.message = this.newMessage.content.trim()
-      if (this.loginUser.id == null) {
-        this.$message.error('登录用户编号获取失败,请重新登录!')
-        return
-      }
-      if (this.loginUser.id  === this.currentUser.id) {
-        this.$message.error('不能给自己发送信息!')
-        return
-      }
-      this.newMessage.sendUserId = this.loginUser.id
-      this.newMessage.receiveUserId = this.currentUser.id
-      if (typeof (WebSocket) == "undefined") {
+      if (this.currentUser!=null){
+        if (!this.newMessage.content.trim()) {
+          this.$message.warning('请输入聊天内容')
+          return
+        }
+        this.newMessage.message = this.newMessage.content.trim()
+        if (this.loginUser.id == null) {
+          this.$message.error('登录用户编号获取失败,请重新登录!')
+          return
+        }
+        if (this.loginUser.id  === this.currentUser.id) {
+          this.$message.error('不能给自己发送信息!')
+          return
+        }
+        this.newMessage.sendUser = this.loginUser.id
+        this.newMessage.receiveUser = this.currentUser.id
+        this.newMessage.chatType = "private"
+        if (typeof (WebSocket) == "undefined") {
+          console.log("您的浏览器不支持WebSocket");
+        } else {
+          console.log("您的浏览器支持WebSocket");
+          // 组装待发送的消息 json
+          // {"from": "zhang", "to": "admin", "text": "聊天文本"}
+          // let message = {from: this.user.username, to: this.chatUser, text: this.text}
+          console.log(this.newMessage);
+          console.log(typeof (this.newMessage.sendUser));
+          console.log(typeof (this.newMessage.receiveUser));
+          console.log(this.newMessage);
+          socket.send(JSON.stringify(this.newMessage));  // 将组装好的json发送给服务端，由服务端进行转发
+          // this.messages.push({user: this.user.username, text: this.text})
+          // 构建消息内容，本人消息
+          // this.createContent(null, this.user.username, this.text)
+          // this.text = '';
+          axios.post("/api/chat/send", this.newMessage).then(res => {
+            console.log(res)
+            console.log(this.currentUser)
+            const message = {
+              chatType: 0,
+              user: this.currentUser
+            }
+            this.chooseUser(message)
+            this.searchUserMessage() //更新当前最新消息
+          })
+        }
+      }else {
+        console.log("发送群聊id",this.currentGroupId);
+        if (!this.newMessage.content.trim()) {
+          this.$message.warning('请输入聊天内容')
+          return
+        }
+        this.newMessage.message = this.newMessage.content.trim()
+        if (this.loginUser.id == null) {
+          this.$message.error('登录用户编号获取失败,请重新登录!')
+          return
+        }
+        this.newMessage.sendUser = this.loginUser.id
+        this.newMessage.groupId = this.currentGroupId
+        this.newMessage.chatType = "group"
+        if (typeof (WebSocket) == "undefined") {
           console.log("您的浏览器不支持WebSocket");
       } else {
           console.log("您的浏览器支持WebSocket");
@@ -968,11 +1011,18 @@ export default {
       if (type === 0){
         this.messageType = 0 //设置当前类型为单聊消息 用于区分右侧消息内容
         console.log(111)
-        this.currentUser = message.user
+        this.currentUser = message.user //当前为单聊设置发送对象user
+        this.currentGroupId = "" //当前设置群聊为空
+        console.log("当前选择群聊",this.currentGroupId)
+        console.log("当前选择聊天对象",this.currentUser)
         this.fetchMessages(message.user.id)
       }else if(type === 1){
         this.messageType = 1 //设置当前类型为单聊消息 用于区分右侧消息内容
-        this.fetchMessagesGroup(message.group)
+        this.currentUser = null //当前为单聊设置发送对象null
+        this.currentGroupId = message.group.groupId //当前设置群聊为空
+        console.log("当前选择群聊",this.currentGroupId)
+        console.log("当前选择聊天对象",this.currentUser)
+        this.fetchMessagesGroup(message.group.groupId)
       }
 
     },
