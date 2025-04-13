@@ -562,16 +562,15 @@
         </div>
         <div v-if="messageType==1">
 
-          <div class="messageBox" v-for="message in groupMessages" :key="message" :class="{ ownMessage: message.userId === loginUser.id, otherMessage: message.userId !== loginUser.id }">
-            <div v-if="message.type==1">
+          <div  class="messageBox" v-for="message in groupMessages" :key="message" :class="{ ownMessage: message.userId === loginUser.id, otherMessage: message.userId !== loginUser.id }">
+<!--           &lt;!&ndash;type=2系统消息&ndash;&gt; 不展示用户头像且信息居中-->
+<!--              <div class="messageContent">{{ message.content}}</div>
+              <div class="messageTime">{{ message.sendTime }}</div>-->
+             <!--type=1 成员消息-->
+              <div v-if="message.type==1"><img :src="message.userId === loginUser.id ? loginUser.avatar : message.userAvatar" alt="" style="border: 1px solid #70c1fa;"></div>
               <div class="messageContent">{{ message.content}}</div>
               <div class="messageTime">{{ message.sendTime }}</div>
-            </div>
-            <div v-else>
-              <div><img :src="message.userId === loginUser.id ? loginUser.avatar : message.userAvatar" alt="" style="border: 1px solid #70c1fa;"></div>
-              <div class="messageContent">{{ message.content}}</div>
-              <div class="messageTime">{{ message.sendTime }}</div>
-            </div>
+
             <!--          <div v-if=""></div>-->
           </div>
         </div>
