@@ -15,7 +15,7 @@ const app = createApp(App)
 
 // 先安装 Pinia 和路由，再挂载应用
 // app.use(axios)
-app.use(pinia)  // ✅ 必须在 app.mount() 之前调用
+app.use(pinia)  //必须在 app.mount() 之前调用
 app.use(router)
 app.use(ElementPlus)
 

@@ -211,8 +211,8 @@
         <!-- 新好友弹窗组件 -->
         <!-- 申请列表弹窗 -->
         <div v-if="showDialog" class="dialog-mask">
-<!--          <div class="user-card"> @click="closeDialog"></div>-->
-<!--333-->
+          <!--          <div class="user-card"> @click="closeDialog"></div>-->
+          <!--333-->
           <div class="dialog-content">
             <div class="close-btn" @click="closeApply">×</div>
             <h3 class="dialog-title">好友申请</h3>
@@ -223,7 +223,7 @@
                   :key="index"
                   class="application-item"
               >
-                  <!--      点击可以查看用户信息          -->
+                <!--      点击可以查看用户信息          -->
                 <div class="user-avatar" @click="">
                   <img :src="item.applyUser.avatar" alt="avatar" />
                 </div>
@@ -252,7 +252,7 @@
                   >
                     拒绝
                   </button>
-<!--                  :class="['status-tag']"-->
+                  <!--                  :class="['status-tag']"-->
                   <span
                       v-else
                       :class="['status-tag', item.status]"
@@ -268,99 +268,99 @@
       </template>
       <template v-if="activeTab === 'message'">
 
-<!--        搜索框和消息加上统一容器-->
+        <!--        搜索框和消息加上统一容器-->
         <div class="left-chat-container">
 
-              <!-- Search input (moved outside) -->
-            <div class="search-wrapper">
-      <!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
-              <input
-                  type="text"
-                  v-model="searchUserName"
-                  placeholder="回车搜索用户"
-                  class="search-input"
-                  @keydown.enter="searchUserForForm"
-                  @input="handleSearchInput"
-              >
+          <!-- Search input (moved outside) -->
+          <div class="search-wrapper">
+            <!--        <el-input v-model="searchUserName" placeholder="回车搜索用户" class="search-input" @keydown.enter.native="searchUserForForm"></el-input>-->
+            <input
+                type="text"
+                v-model="searchUserName"
+                placeholder="回车搜索用户"
+                class="search-input"
+                @keydown.enter="searchUserForForm"
+                @input="handleSearchInput"
+            >
 
-              <!-- 新增独立图标按钮 -->
-              <button class="add-btn" @click="newChatGroup">+</button>
-            </div>
+            <!-- 新增独立图标按钮 -->
+            <button class="add-btn" @click="newChatGroup">+</button>
+          </div>
 
-<!--          群聊弹窗按钮，后续再独立成单独的组件-->
+          <!--          群聊弹窗按钮，后续再独立成单独的组件-->
           <!-- 弹窗容器 -->
-<!--          <div v-if="showNewgroup" class="dialog-mask">-->
-<!--            <div class="dialog-wrapper">-->
-<!--              &lt;!&ndash; 标题栏 &ndash;&gt;-->
-<!--              <div class="dialog-header">-->
-<!--                <h3>发起群聊</h3>-->
-<!--                <span class="close-btn" @click="showDialog = false">×</span>-->
-<!--              </div>-->
+          <!--          <div v-if="showNewgroup" class="dialog-mask">-->
+          <!--            <div class="dialog-wrapper">-->
+          <!--              &lt;!&ndash; 标题栏 &ndash;&gt;-->
+          <!--              <div class="dialog-header">-->
+          <!--                <h3>发起群聊</h3>-->
+          <!--                <span class="close-btn" @click="showDialog = false">×</span>-->
+          <!--              </div>-->
 
-<!--              &lt;!&ndash; 内容区 &ndash;&gt;-->
-<!--              <div class="dialog-body">-->
-<!--                &lt;!&ndash; 群聊名称输入 &ndash;&gt;-->
-<!--                <div class="input-group">-->
-<!--                  <label>群聊名称</label>-->
-<!--                  <input-->
-<!--                      v-model="groupName"-->
-<!--                      type="text"-->
-<!--                      placeholder="请输入群聊名称"-->
-<!--                      class="wechat-input"-->
-<!--                  >-->
-<!--                </div>-->
+          <!--              &lt;!&ndash; 内容区 &ndash;&gt;-->
+          <!--              <div class="dialog-body">-->
+          <!--                &lt;!&ndash; 群聊名称输入 &ndash;&gt;-->
+          <!--                <div class="input-group">-->
+          <!--                  <label>群聊名称</label>-->
+          <!--                  <input-->
+          <!--                      v-model="groupName"-->
+          <!--                      type="text"-->
+          <!--                      placeholder="请输入群聊名称"-->
+          <!--                      class="wechat-input"-->
+          <!--                  >-->
+          <!--                </div>-->
 
-<!--                &lt;!&ndash; 好友搜索选择 &ndash;&gt;-->
-<!--                <div class="input-group">-->
-<!--                  <label>添加成员</label>-->
-<!--                  <div class="search-wrapper">-->
-<!--                    <input-->
-<!--                        v-model="searchKey"-->
-<!--                        type="text"-->
-<!--                        placeholder="搜索好友"-->
-<!--                        class="wechat-input"-->
-<!--                        @input="filterFriends"-->
-<!--                    >-->
-<!--                    <div class="friend-list">-->
-<!--                      <div-->
-<!--                          v-for="friend in filteredContacts"-->
-<!--                          :key="friend.friendUser.id"-->
-<!--                          class="friend-item"-->
-<!--                      >-->
-<!--                        &lt;!&ndash; 复选框前置 &ndash;&gt;-->
-<!--                        <label class="checkbox-wrapper">-->
-<!--                          <input-->
-<!--                              type="checkbox"-->
-<!--                              v-model="selectedFriends"-->
-<!--                              :value="friend.friendUser.id"-->
-<!--                              class="wechat-checkbox"-->
-<!--                          >-->
-<!--                          <span class="checkmark"></span> &lt;!&ndash; 自定义样式层 &ndash;&gt;-->
-<!--                        </label>-->
+          <!--                &lt;!&ndash; 好友搜索选择 &ndash;&gt;-->
+          <!--                <div class="input-group">-->
+          <!--                  <label>添加成员</label>-->
+          <!--                  <div class="search-wrapper">-->
+          <!--                    <input-->
+          <!--                        v-model="searchKey"-->
+          <!--                        type="text"-->
+          <!--                        placeholder="搜索好友"-->
+          <!--                        class="wechat-input"-->
+          <!--                        @input="filterFriends"-->
+          <!--                    >-->
+          <!--                    <div class="friend-list">-->
+          <!--                      <div-->
+          <!--                          v-for="friend in filteredContacts"-->
+          <!--                          :key="friend.friendUser.id"-->
+          <!--                          class="friend-item"-->
+          <!--                      >-->
+          <!--                        &lt;!&ndash; 复选框前置 &ndash;&gt;-->
+          <!--                        <label class="checkbox-wrapper">-->
+          <!--                          <input-->
+          <!--                              type="checkbox"-->
+          <!--                              v-model="selectedFriends"-->
+          <!--                              :value="friend.friendUser.id"-->
+          <!--                              class="wechat-checkbox"-->
+          <!--                          >-->
+          <!--                          <span class="checkmark"></span> &lt;!&ndash; 自定义样式层 &ndash;&gt;-->
+          <!--                        </label>-->
 
-<!--                        <div class="user-avatar-wrapper">-->
-<!--                          &lt;!&ndash; 方形头像 &ndash;&gt;-->
-<!--                          <img-->
-<!--                              :src="friend.friendUser.avatar"-->
-<!--                              class="user-avatar"-->
-<!--                          >-->
-<!--                        </div>-->
+          <!--                        <div class="user-avatar-wrapper">-->
+          <!--                          &lt;!&ndash; 方形头像 &ndash;&gt;-->
+          <!--                          <img-->
+          <!--                              :src="friend.friendUser.avatar"-->
+          <!--                              class="user-avatar"-->
+          <!--                          >-->
+          <!--                        </div>-->
 
-<!--                        <span>{{ friend.friendUser.userName }}</span>-->
-<!--                      </div>-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
+          <!--                        <span>{{ friend.friendUser.userName }}</span>-->
+          <!--                      </div>-->
+          <!--                    </div>-->
+          <!--                  </div>-->
+          <!--                </div>-->
+          <!--              </div>-->
 
-<!--              &lt;!&ndash; 操作按钮 &ndash;&gt;-->
-<!--              <div class="dialog-footer">-->
-<!--                <button class="cancel-btn" @click="showDialog = false">取消</button>-->
-<!--                <button class="confirm-btn" @click="createGroup">发起群聊</button>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--新实现-->
+          <!--              &lt;!&ndash; 操作按钮 &ndash;&gt;-->
+          <!--              <div class="dialog-footer">-->
+          <!--                <button class="cancel-btn" @click="showDialog = false">取消</button>-->
+          <!--                <button class="confirm-btn" @click="createGroup">发起群聊</button>-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--          </div>-->
+          <!--新实现-->
           <div v-if="showNewgroup" class="dialog-mask">
             <div class="dialog-wrapper wechat-style">
               <!-- 对话框主体 -->
@@ -442,103 +442,103 @@
             </div>
           </div>
           <!-- User list (with scroll) -->
-            <el-scrollbar class="user-list-scroll">
-              <!-- 搜索结果悬浮层 -->
-              <transition name="fade">
-                <el-scrollbar
-                    v-show="showSearchResult"
-                    class="user-list-scroll-search"
-                    :class="{ 'search-active': showSearchResult }"
-                >
-                  <el-row>
-                    <el-col
-                        :span="24"
-                        v-for="form in searchMessageForm"
-                        :key="form.recieiveUser.id"
-                        @click.native="handleSelectUser(form.recieiveUser)"
-                        class="user-item"
-                    >
-                      <!-- 用户项结构（同原有内容） -->
-                      <div class="user-avatar-wrapper">
-                        <!-- 方形头像 -->
-                        <img
-                            :src="form.recieiveUser.avatar"
-                            class="user-avatar"
-                        >
-
-                        <!-- 未读消息徽章 -->
-                        <el-badge
-                            :value="form.noReadMessageLength"
-                            v-if="form.noReadMessageLength > 0"
-                            class="message-badge"
-                        />
-
-                        <!-- 在线状态指示 -->
-                        <div
-                            v-if="form.recieiveUser.isOnline"
-                            class="online-dot"
-                        ></div>
-                      </div>
-
-                      <div class="user-details">
-                        <div class="header-line">
-                          <div class="user-name">{{ form.recieiveUser.userName }}</div>
-                          <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
-                        </div>
-                        <div class="last-message">
-                          {{ form.lastMessage || "暂无消息" }}
-                        </div>
-                      </div>
-                    </el-col>
-                  </el-row>
-                </el-scrollbar>
-              </transition>
-              <el-row>
-                <el-col
-                    :span="24"
-                    v-for="form in curAllMessage"
-                    @click.native="chooseUser(form)"
-                    class="user-item"
-                    v-if="messageForm.length !== 0"
-                >
+          <el-scrollbar class="user-list-scroll">
+            <!-- 搜索结果悬浮层 -->
+            <transition name="fade">
+              <el-scrollbar
+                  v-show="showSearchResult"
+                  class="user-list-scroll-search"
+                  :class="{ 'search-active': showSearchResult }"
+              >
+                <el-row>
+                  <el-col
+                      :span="24"
+                      v-for="form in searchMessageForm"
+                      :key="form.recieiveUser.id"
+                      @click.native="handleSelectUser(form.recieiveUser)"
+                      class="user-item"
+                  >
+                    <!-- 用户项结构（同原有内容） -->
                     <div class="user-avatar-wrapper">
-                    <!-- 方形头像 -->
-                    <img
-                        :src="form.avatar"
-                        class="user-avatar"
-                    >
+                      <!-- 方形头像 -->
+                      <img
+                          :src="form.recieiveUser.avatar"
+                          class="user-avatar"
+                      >
 
-                    <!-- 未读消息徽章 -->
-                    <el-badge
-                        :value="form.unreadCount"
-                        v-if="form.unreadCount > 0"
-                        class="message-badge"
-                    />
+                      <!-- 未读消息徽章 -->
+                      <el-badge
+                          :value="form.noReadMessageLength"
+                          v-if="form.noReadMessageLength > 0"
+                          class="message-badge"
+                      />
 
-                    <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
-                    <!--              <div-->
-                    <!--                  v-if="form.recieiveUser.isOnline"-->
-                    <!--                  class="online-dot"-->
-                    <!--              ></div>-->
-                  </div>
+                      <!-- 在线状态指示 -->
+                      <div
+                          v-if="form.recieiveUser.isOnline"
+                          class="online-dot"
+                      ></div>
+                    </div>
 
                     <div class="user-details">
                       <div class="header-line">
-                        <div class="user-name">{{ form.chatName }}</div>
-                        <div class="message-time">{{ formatTime(form.lastSendTime) }}</div>
+                        <div class="user-name">{{ form.recieiveUser.userName }}</div>
+                        <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
                       </div>
                       <div class="last-message">
+                        {{ form.lastMessage || "暂无消息" }}
+                      </div>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-scrollbar>
+            </transition>
+            <el-row>
+              <el-col
+                  :span="24"
+                  v-for="form in curAllMessage"
+                  @click.native="chooseUser(form)"
+                  class="user-item"
+                  v-if="messageForm.length !== 0"
+              >
+                <div class="user-avatar-wrapper">
+                  <!-- 方形头像 -->
+                  <img
+                      :src="form.avatar"
+                      class="user-avatar"
+                  >
+
+                  <!-- 未读消息徽章 -->
+                  <el-badge
+                      :value="form.unreadCount"
+                      v-if="form.unreadCount > 0"
+                      class="message-badge"
+                  />
+
+                  <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
+                  <!--              <div-->
+                  <!--                  v-if="form.recieiveUser.isOnline"-->
+                  <!--                  class="online-dot"-->
+                  <!--              ></div>-->
+                </div>
+
+                <div class="user-details">
+                  <div class="header-line">
+                    <div class="user-name">{{ form.chatName }}</div>
+                    <div class="message-time">{{ formatTime(form.lastSendTime) }}</div>
+                  </div>
+                  <div class="last-message">
                           <span :class="['username', { truncate: form.chatName.length>6 }]">
                       {{form.chatName}}
                           </span>：
-                        {{ form.lastContent || "暂无消息" }}
-                      </div>
-                    </div>
+                    {{ form.lastContent || "暂无消息" }}
+                  </div>
+                </div>
 
 
-                </el-col>
-              </el-row>
-            </el-scrollbar>
+              </el-col>
+            </el-row>
+          </el-scrollbar>
         </div>
 
       </template>
@@ -547,9 +547,12 @@
     <div class="right-side">
       <!-- Chat header -->
       <div class="chat-header">
+        <!--        :class="{ 'long-name': currentUser.userName.length > 6 }" -->
         <span v-if="currentUser" class="username-wrap"
-              :class="{ 'long-name': currentUser.userName.length > 6 }">{{ currentUser.userName }}</span>
-      </div>
+        >{{ currentUser.userName }}</span>
+        <!--        <span v-if="currentGroupId" class="username-wrap"
+                      :class="{ 'long-name': currentUser.userName.length > 6 }">{{ currentUser.userName }}</span>
+           -->   </div>
       <!-- Chat messages -->
       <el-scrollbar class="chat-messages" ref="messageContainer">
         <div v-if="messageType==0">
@@ -563,13 +566,13 @@
         <div v-if="messageType==1">
 
           <div  class="messageBox" v-for="message in groupMessages" :key="message" :class="{ ownMessage: message.userId === loginUser.id, otherMessage: message.userId !== loginUser.id }">
-<!--           &lt;!&ndash;type=2系统消息&ndash;&gt; 不展示用户头像且信息居中-->
-<!--              <div class="messageContent">{{ message.content}}</div>
-              <div class="messageTime">{{ message.sendTime }}</div>-->
-             <!--type=1 成员消息-->
-              <div v-if="message.type==1"><img :src="message.userId === loginUser.id ? loginUser.avatar : message.userAvatar" alt="" style="border: 1px solid #70c1fa;"></div>
-              <div class="messageContent">{{ message.content}}</div>
-              <div class="messageTime">{{ message.sendTime }}</div>
+            <!--           &lt;!&ndash;type=2系统消息&ndash;&gt; 不展示用户头像且信息居中-->
+            <!--              <div class="messageContent">{{ message.content}}</div>
+                          <div class="messageTime">{{ message.sendTime }}</div>-->
+            <!--type=1 成员消息-->
+            <div v-if="message.type==1"><img :src="message.userId === loginUser.id ? loginUser.avatar : message.userAvatar" alt="" style="border: 1px solid #70c1fa;"></div>
+            <div class="messageContent">{{ message.content}}</div>
+            <div class="messageTime">{{ message.sendTime }}</div>
 
             <!--          <div v-if=""></div>-->
           </div>
@@ -597,12 +600,17 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 // import request from "@/utils/request";
 import axios from "axios";
+import request from '../utils/request.ts'
 
-let socket;
-import { reactive,ref} from 'vue'
+let socket = null;
+import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw} from 'vue'
+// 在setup函数中获取组件实例
+const instance = getCurrentInstance();
+// const container = instance?.proxy?.$refs.messageContainer; // 需添加可选链操作符‌:ml-citation{ref="3,8" data="citationList"}
+
 let messageContainer =ref(null)
 let formInline = reactive({
   user: '',
@@ -616,677 +624,631 @@ import {
   Setting
 } from '@element-plus/icons-vue'
 
+let showNewgroup = ref(false)
+let friendApplications=ref([]) //申请好友列表
+let  showDialog=ref(false) // 好友申请控制弹窗显示
+let   unreadMessage=ref(0 )//所有的未读消息数量
+let   unreadApply=ref(0)//所有的未处理的好友申请数量
+let  unreadMoment=ref(0)//所有的未看过的朋友圈数量
+let   showResultLayer =ref(false)
+let  searchResult=reactive({})
+let   showUserDialog=ref(false)
+let   showAddFriendForm=ref(false)
+let   applyReason=ref('')
+let    isFriend=ref(false)
+let   filteredContacts=ref([])
+let   selectedFriends=ref([])//新建群聊选择的好友
+let   contactSearch=ref('')
+let   activeTab=ref("message")
+let   circleUrl=ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
+let  user=ref({})
+let isCollapse=ref(false)
+let  users=ref([])
+let   chatUser=ref('')
+let    text=ref("")
+let    content=ref('')
+let   currentUser=reactive({})// 当前聊天的人
+let    currentGroupId=ref("") // 当前聊天的群
+let    currentSearchUser=reactive({}) // 当前搜索的用户
+let    loginUser=reactive({})
+let    messages=ref([]) //单聊消息
+let    groupMessages=ref([]) //群聊消息
+let   messageType=ref(0)// 当前消息类型 0单来哦 1群聊
+let  messageForm=ref([]) // 聊天所有信息
+let  curAllMessage=ref([]) // 当前用户聊天所有信息根据消息发送时间倒序排序加上群聊消息
+let  searchMessageForm=ref([]) // 搜索聊天所有信息
+let   newMessage=ref({
+  id: '',
+  sendUser: '',
+  receiveUser: '',
+  message: '',
+  notRead: '0',
+  chatType:'private', //聊天对象 private 单聊 group 群聊
+  groupId: '', //扩展群聊id
+  createTime: '',
+  updateTime: '',
+})
+let searchUserName=ref('')
+let  showSearchResult=ref(false)
 
 // 状态管理
 // const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
 
+// 初始化虚拟数据
+const initMockData = () => {
+  messageForm.value = Array.from({ length: 15 }, (_, i) => ({
+    recieiveUser: {
+      id: `user_${i + 1}`,
+      userName: `用户 ${i + 1}`,
+      avatar: `https://picsum.photos/40/40?random=${i}`,
+      isOnline: Math.random() > 0.5
+    },
+    noReadMessageLength: Math.floor(Math.random() * 5),
+    lastMessage: generateMockMessage(),
+    lastMessageTime: Date.now() - Math.random() * 86400000
+  }))
+}
+// 显示用户卡片
+const showUserCard = (user) =>{
+  currentSearchUser = user;
+  showResultLayer.value = false;
+
+  // 检查好友状态
+  // try {
+  //   const res =  this.$http.get(`/api/friend-status/${user.id}`);
+  //   this.isFriend = res.data.isFriend;
+  //请求查看当前搜索用户是否为当前用户的好友
+  showUserDialog.value = true
+  request.post("api/friends/search/isFriend", currentSearchUser
+
+  ).then(res => {
+    if (res.data.code === 200) {
+      isFriend.value = true
+    }else {
+      isFriend.value = false
+    }
+    console.log(res)
+  })
+  // } catch (error) {
+  //   this.searchResult = null;
+  //   this.showResultLayer = true;
+  // }
+  // } catch (error) {
+  //   console.error('获取好友状态失败');
+  // }
+}
+// 搜索用户
+const handleSearchUser=()=> {
+  if (!contactSearch.value.trim()) return;
+
+  try {
+    // 模拟API调用
+    const res = request.get("api/friends/search/user",{
+          params:{"phone":contactSearch.value}
+        }
+    ).then(res => {
+      if (res.data.code === 200) {
+        searchResult = res.data.data;
+        showResultLayer.value = true;
+        console.log(searchResult);
+      }else {
+      }
+      console.log(res)
+    })
+  } catch (error) {
+    searchResult = null;
+    showResultLayer.value = true;
+  }
+}
+//展示所有的用户申请列表
+const showNewFriendList=()=>{
+  getAllRequests()
+  //新好友列表弹窗
+  showDialog.value = true
+
+}
+//关闭查看所有好友申请弹窗
+const closeApply=()=>{
+  showDialog.value = false
+}
+// 关闭申请弹窗
+const closeDialog=() =>{
+  showUserDialog.value = false;
+  currentSearchUser = {};
+}
+
+// 提交好友申请
+const handleSubmitApply=()=> {
+  try {
+    request.post('/api/friends/friend-apply', {
+      applyUserId: currentSearchUser.id,
+      reason:applyReason.value,
+    }).then(res => {
+      console.log(res)
+    });
+
+    this.$message.success('好友申请已发送');
+    showAddFriendForm.value = false;
+  } catch (error) {
+    this.$message.error('发送失败，请重试');
+  }
+}
+
+// 进入好友申请表单
+const enterAddFriend=() =>{
+  showAddFriendForm.value = true;
+  applyReason.value = '';
+}
+const generateMockMessage=() =>{
+  const messages = [
+    '你好，今天有空吗？',
+    '项目文档已更新',
+    '[图片]',
+    '[文件]',
+    '明天会议时间确认？'
+  ]
+  return messages[Math.floor(Math.random() * messages.length)]
+}
+const updateTab=(tab)=>{
+  activeTab.value = tab
+  console.log(activeTab.value)
+  if (activeTab.value === "contact") {
+    searchAllFriends()
+  }else if (activeTab.value === "message") {
+    searchUserMessage()
+  }
+}
+//搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
+const searchAllFriends=()=>{
+  request.get("api/friends/all").then(res => {
+    console.log(res)
+    filteredContacts.value = res.data;
+    console.log(filteredContacts.value)
+  })
+}
+const formatTime=(timestamp)=> {
+  const date = new Date(timestamp)
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+const send=()=> {
+  console.log(currentUser.valueOf())
+  const flag = Object.keys(toRaw(currentUser)).length === 0
+  console.log(flag )
+  if (!flag){
+    if (!newMessage.value.content.trim()) {
+      this.$message.warning('请输入聊天内容')
+      return
+    }
+    newMessage.value.message = newMessage.value.content.trim()
+    if (loginUser.id == null) {
+      this.$message.error('登录用户编号获取失败,请重新登录!')
+      return
+    }
+    if (loginUser.id  === currentUser.id) {
+      this.$message.error('不能给自己发送信息!')
+      return
+    }
+    newMessage.value.sendUser = loginUser.id
+    newMessage.value.receiveUser = currentUser.id
+    newMessage.value.chatType = "private"
+    if (typeof (WebSocket) == "undefined") {
+      console.log("您的浏览器不支持WebSocket");
+    } else {
+      console.log("您的浏览器支持WebSocket");
+      // 组装待发送的消息 json
+      // {"from": "zhang", "to": "admin", "text": "聊天文本"}
+      // let message = {from: this.user.username, to: this.chatUser, text: this.text}
+      console.log(newMessage.value);
+      console.log(typeof (newMessage.value.sendUser));
+      console.log(typeof (newMessage.value.receiveUser));
+      console.log(newMessage.value);
+      socket.send(JSON.stringify(newMessage.value));  // 将组装好的json发送给服务端，由服务端进行转发
+      // this.messages.push({user: this.user.username, text: this.text})
+      // 构建消息内容，本人消息
+      // this.createContent(null, this.user.username, this.text)
+      // this.text = '';
+      request.post("/api/chat/send", newMessage.value).then(res => {
+        console.log(res)
+        console.log(currentUser)
+        const message = {
+          chatType: 0,
+          user: currentUser
+        }
+        chooseUser(message)
+        searchUserMessage() //更新当前最新消息
+      })
+    }
+  }else {
+    console.log("发送群聊id",currentGroupId.value);
+    if (!newMessage.value.content.trim()) {
+      this.$message.warning('请输入聊天内容')
+      return
+    }
+    newMessage.value.message = newMessage.value.content.trim()
+    if (loginUser.id == null) {
+      this.$message.error('登录用户编号获取失败,请重新登录!')
+      return
+    }
+    newMessage.value.sendUser = loginUser.id
+    newMessage.value.groupId = currentGroupId.value
+    newMessage.value.chatType = "group"
+    if (typeof (WebSocket) == "undefined") {
+      console.log("您的浏览器不支持WebSocket");
+    } else {
+      console.log("您的浏览器支持WebSocket");
+      // 组装待发送的消息 json
+      // {"from": "zhang", "to": "admin", "text": "聊天文本"}
+      // let message = {from: this.user.username, to: this.chatUser, text: this.text}
+      console.log(newMessage.value);
+      socket.send(JSON.stringify(newMessage.value));  // 将组装好的json发送给服务端，由服务端进行转发
+      // this.messages.push({user: this.user.username, text: this.text})
+      // 构建消息内容，本人消息
+      // this.createContent(null, this.user.username, this.text)
+      // this.text = '';
+      request.post("/api/chat/send", newMessage.value).then(res => {
+        console.log(res)
+        console.log(currentUser)
+        const message = {
+          chatType: 1,
+          group:{
+            groupId: currentGroupId.value,
+          }
+        }
+        chooseUser(message)
+        searchUserMessage() //更新当前最新消息
+      })
+    }
+  }
+
+
+}
+//搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
+const searchUserForForm=()=>{
+  request.get("api/chat/allChat",{
+    params:{"sendUserId":loginUser.id,
+      "searchUserName":searchUserName.value
+    }
+  }).then(res => {
+    console.log(res)
+    showSearchResult.value = true
+    searchMessageForm.value = res.data.data;
+    console.log(searchMessageForm.value)
+  })
+}
+//搜索当前用户发过的消息和接受到的消息，根据最后一条消息时间倒序排序
+const searchUserMessage=()=>{
+  request.get("api/chat/allChatUser").then(res => {
+    console.log(res)
+    curAllMessage.value = res.data.data;
+    console.log(curAllMessage.value)
+    // this.showSearchResult = true
+    // this.searchMessageForm = res.data.data;
+    // console.log(this.searchMessageForm)
+  })
+}
+
+const handleSearchInput=(val)=> {
+  if (!val) {
+    showSearchResult.value = false
+  }
+}
+const handleSelectUser=(user)=>{
+  const message = {
+    chatType: 0,
+    user: user
+  }
+  chooseUser(message)
+  showSearchResult.value = false
+  searchUserName.value = ''
+}
+
+const chooseUser= (message) =>{
+  console.log(message)
+  const type = message.chatType
+  if (type === 0){
+
+    messageType.value = 0 //设置当前类型为单聊消息 用于区分右侧消息内容
+    console.log(111)
+    currentUser = message.user //当前为单聊设置发送对象user
+    currentGroupId.value = "" //当前设置群聊为空
+    console.log("进入了单聊if当前选择群聊",currentGroupId.value)
+    console.log("进入了单聊if当前选择聊天对象",currentUser.valueOf())
+    fetchMessages(message.user.id)
+  }else if(type === 1){
+    messageType.value = 1 //设置当前类型为单聊消息 用于区分右侧消息内容
+    currentUser = {} //当前为单聊设置发送对象null
+    currentGroupId.value = message.group.groupId //当前设置群聊为空
+    console.log("进入了群聊if当前选择群聊",currentGroupId.value)
+    console.log("进入了群聊if当前选择聊天对象",currentUser)
+    fetchMessagesGroup(message.group.groupId)
+  }
+
+}
+//更新消息列表单聊
+const fetchMessages=(userId) =>{
+  request.get("api/chat/oneChat",{
+    params:{"sendUserId":loginUser.id,
+      "receiveUserId":userId
+    }
+  }).then(res => {
+    messages.value = res.data.data[0].chatContents
+    console.log(messages.value )
+    // 将聊天记录总下拉到最下方
+    nextTick(() => {
+      scrollToBottom()
+    })
+  })
+}
+//更新消息列表群聊
+const fetchMessagesGroup=(groupId) =>{
+  console.log(groupId)
+  request.get("api/chat/groupChat",{
+    params:{"groupId":groupId,
+    }
+  }).then(res => {
+    // this.messages = res.data.data[0].chatContents
+    console.log(res)
+    groupMessages.value= res.data.data
+    // 将聊天记录总下拉到最下方
+    nextTick(() => {
+      scrollToBottom()
+    })
+  })
+}
+//获取所有的好友请求
+const getAllRequests=(userId)=> {
+  request.get("api/friends/requests/all",{
+    params:{"sendUserId":loginUser.id,
+      "receiveUserId":userId
+    }
+  }).then(res => {
+    console.log(res.data)
+    friendApplications.value = res.data
+  })
+}
+//获取所有未处理的好友请求
+const getAllPending=(userId) =>{
+  request.get("api/friends/requests/all/getPending",{
+    params:{"sendUserId":loginUser.id,
+      "receiveUserId":userId
+    }
+  }).then(res => {
+    // this.messages = res.data.data[0].chatContents
+    // console.log(this.messages)
+    // // 将聊天记录总下拉到最下方
+    // this.$nextTick(() => {
+    //   this.scrollToBottom()
+    // })
+    console.log(res.data)
+    unreadApply.value = res.data.length
+    console.log(unreadApply.value)
+  })
+}
+
+/*同意和拒绝好友*/
+const handleApply =(requestid,accept)=>{
+  request.put(`api/friends/requests/${requestid}?accept=${accept}`,{
+    "accept":accept,
+  }).then(res => {
+    console.log(res.data)
+    friendApplications.value = res.data
+    showDialog.value = false
+  })
+}
+/*发起群聊*/
+const newChatGroup=()=>{
+  searchAllFriends()
+  showNewgroup.value=true
+  console.log("333")
+  console.log(filteredContacts.value)
+  console.log(filteredContacts.value)
+
+}
+
+// 判断是否已选中
+const isSelected=(friend) =>{
+  return selectedFriends.value.some(f =>
+      f.friendUser.id === friend.friendUser.id
+  );
+}
+
+// 切换选择状态
+const toggleSelection=(friend)=> {
+  const index = selectedFriends.value.findIndex(f =>
+      f.friendUser.id === friend.friendUser.id
+  );
+  console.log(index, friend)
+  if (index > -1) {
+    selectedFriends.value.splice(index, 1);
+  } else {
+    selectedFriends.value.push(friend);
+  }
+}
+// 移除单个好友
+const removeFriend=(index)=> {
+  selectedFriends.value.splice(index, 1);
+}
+
+// 清空所有选择
+const clearAll=()=> {
+  selectedFriends.value = [];
+}
+
+// 创建群组
+const createGroup=()=>{
+  if (!groupName.value) {
+    alert('请填写群聊名称');
+    return;
+  }
+  if (selectedFriends.value.length < 1) {
+    alert('请至少选择一位成员');
+    return;
+  }
+
+  const payload = {
+    groupName: groupName.value,
+    member: selectedFriends.value.map(f => f.friendUser)
+  };
+
+  // 调用API
+  console.log('提交数据:', payload);
+  this.$emit('create', payload);
+  request.post("api/group/create",payload).then(res => {
+
+    console.log(res.data)
+  })
+  clearAll();
+  groupName.value = '';
+  //关闭弹窗
+  showNewgroup.value = false;
+}
+// 消息过多的时候滚动到最新消息位置
+const scrollToBottom = () =>{
+  // 使用 $refs 来获取对消息容器的引用
+  const container = instance?.proxy?.$refs.messageContainer
+  console.log(container)
+  var assign = Object.assign({}, container);
+  console.log(assign);
+  console.log(assign.wrapRef);
+  assign.wrapRef.scrollTop=100000
+  // console.log(container.scrollHeight)
+  // messageContainer.value.wrapRef.scrollTop = messageContainer.value.wrapRef.scrollHeight;
+  //
+  // .$refs.wrap
+  // 滚动到底部
+  // container.scrollTop = 900
+}
+const init=() =>{
+
+  console.log(window.sessionStorage.getItem("user"))
+  user.value = window.sessionStorage.getItem("user")
+  if (user.value){
+    console.log(window.sessionStorage.getItem("user"))
+    user.value = {"userId":window.sessionStorage.getItem("user")}
+    console.log(user.value)
+    let userId = user.value.userId;
+    let _this = this;
+    if (typeof (WebSocket) == "undefined") {
+      console.log("您的浏览器不支持WebSocket");
+    } else {
+      console.log("您的浏览器支持WebSocket");
+      console.log("当前登录用户"+userId)
+      let socketUrl = "ws://localhost:8081/imserver/" + userId;
+      // if (socket != null) {
+      //   socket.close();
+      //   socket = null;
+      // }
+      // 开启一个websocket服务
+      // 修复后的逻辑
+      if (socket) {
+        // 无论旧连接状态如何，直接关闭并清空引用
+        socket.close();
+        socket = null; // 防止残留引用
+      }
+      socket = new WebSocket(socketUrl);
+      //打开事件
+      socket.onopen = ()=> {
+        console.log("websocket已打开");
+      };
+      //  浏览器端收消息，获得从服务端发送过来的文本消息
+      socket.onmessage = (msg) => {
+        console.log("收到数据====" + msg.data)
+        console.log(typeof msg.data)
+        var data_new = JSON.parse(msg.data);
+        const type = data_new.type //收到消息类型 2 用户之间发送的消息 1 好友之前处理消息
+        console.log(type)
+        if (type === 2){
+          console.log(data_new);
+          request.get("api/chat/oneChat",{
+            params:{"sendUserId":data_new.receiveUserId,
+              "receiveUserId":data_new.sendUserId
+            }
+          }).then(res => {
+            messages.value  = res.data.data[0].chatContents
+            console.log(messages.value )
+            //浏览器接受服务端返回的消息 接收方更新消息列表
+            searchUserMessage()
+            // 将聊天记录总下拉到最下方
+            nextTick(() => {
+              scrollToBottom()
+            })
+          })
+        }else if(type === 1){ //处理用户之前请求好友关系
+          setTimeout(() => {
+            this.$message.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
+            this.$message.success('验证理由'+data_new.content);
+          }, 3000)
+          //1，更新用户处理中的好友数量 数量=/requests/all/getPending.length
+          getAllPending()
+          //2，用户新的朋友列表请求所有的请求的朋友列表，通过或者拒绝的好友右边显示状态和理由 未处理过的显示通过和拒绝按钮
+          //3，用户点击同意 发送消息给服务端同意 同时把消息存储进消息db 新建一条“通过了您的好友”消息 同时消息列表更新
+        }else if(type === 3){
+
+          searchUserMessage()
+          updateTab('message')
+          //发送请求得展示申请的情况
+          //接受者展示处理情况
+
+        }else if(type === 4){
+          console.log("处理群聊消息")
+          console.log(data_new)
+          //更新群聊消息
+          fetchMessagesGroup(data_new.groupId);
+          //更新最后消息列表
+          searchUserMessage()
+          // 将聊天记录总下拉到最下方
+          nextTick(() => {
+            scrollToBottom()
+          })
+        }
+
+
+      };
+      //关闭事件
+      socket.onclose =  () =>{
+        console.log("websocket已关闭");
+      };
+      //发生了错误事件
+      socket.onerror = (error)=> {
+        console.log("websocket发生了错误");
+        console.error("WebSocket 错误:",error);
+
+      }
+    }
+  }else {
+
+  }
+
+}
+const beforeCreate= ()=> {
+  axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
+  // 获取登录用户userId,请根据自己实际项目获取
+  request.get("api/user/login/user")
+      .then(
+          res => {
+            console.log(res)
+            loginUser = res.data.data
+            console.log(loginUser)
+          }
+      )
+}
+onMounted(() => {
+  beforeCreate()
+  init()
+  initMockData()
+  searchAllFriends()
+  scrollToBottom()
+  searchUserMessage()//默认进入网页当前为消息页
+  getAllPending() //查看当前未处理的好友数量
+});
+
 // 用户数据
 // const loginUser = ref({
 //   avatar: 'https://example.com/avatar.jpg'
 // })
-export default {
-  name: "Im",
-  data() {
-    return {
-      showNewgroup:false,
-      friendApplications:[], //申请好友列表
-      showDialog: false, // 好友申请控制弹窗显示
-      unreadMessage: 0, //所有的未读消息数量
-      unreadApply:0, //所有的未处理的好友申请数量
-      unreadMoment:0,//所有的未看过的朋友圈数量
-      showResultLayer : false,
-      searchResult:null,
-      showUserDialog : false,
-      showAddFriendForm : false,
-      applyReason : '',
-      isFriend : false,
-      filteredContacts:[],
-      selectedFriends:[],//新建群聊选择的好友
-      contactSearch:'',
-      activeTab:"message",
-      circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-      user: {},
-      isCollapse: false,
-      users: [],
-      chatUser: '',
-      text: "",
-      content: '',
-      currentUser: null, // 当前聊天的人
-      currentGroupId: "", // 当前聊天的群
-      currentSearchUser: null, // 当前搜索的用户
-      loginUser: null,
-      messages: [], //单聊消息
-      groupMessages: [], //群聊消息
-      messageType:0,// 当前消息类型 0单来哦 1群聊
-      messageForm: [], // 聊天所有信息
-      curAllMessage: [], // 当前用户聊天所有信息根据消息发送时间倒序排序加上群聊消息
-      searchMessageForm: [], // 搜索聊天所有信息
-      newMessage: {
-        id: '',
-        sendUser: '',
-        receiveUser: '',
-        message: '',
-        notRead: '0',
-        chatType:'private', //聊天对象 private 单聊 group 群聊
-        groupId: '', //扩展群聊id
-        createTime: '',
-        updateTime: '',
-      },
-      searchUserName: '',
-      showSearchResult: false,
-    }
-  },
-  created() {
-    this.init()
-    this.initMockData()
-    this.searchAllFriends()
-  },
-
-  mounted() {
-    this.scrollToBottom()
-    this.searchUserMessage()//默认进入网页当前为消息页
-    this.getAllPending() //查看当前未处理的好友数量
-  },
-  beforeCreate () {
-    axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
-    // 获取登录用户userId,请根据自己实际项目获取
-    axios.get("api/user/login/user")
-        .then(
-            res => {
-              console.log(res)
-              this.loginUser = res.data.data
-              console.log(this.loginUser)
-            }
-        )
-  },
-  methods: {
-    // 初始化虚拟数据
-    initMockData() {
-      this.messageForm = Array.from({ length: 15 }, (_, i) => ({
-        recieiveUser: {
-          id: `user_${i + 1}`,
-          userName: `用户 ${i + 1}`,
-          avatar: `https://picsum.photos/40/40?random=${i}`,
-          isOnline: Math.random() > 0.5
-        },
-        noReadMessageLength: Math.floor(Math.random() * 5),
-        lastMessage: this.generateMockMessage(),
-        lastMessageTime: Date.now() - Math.random() * 86400000
-      }))
-    },
-    /*
-    * 搜索用户*/
-    // handleSearchUser(){
-    //
-    // },
-    handleAddContact(){
-
-    },
-    // 手机号脱敏处理
-    // maskPhone(phone) {
-    //   phone= phone.replace(/(\d{3})\d{4}(\d{4})/, '$1&zwnj;****&zwnj;$2');
-    // }
-
-    // 搜索用户
-    handleSearchUser() {
-      if (!this.contactSearch.trim()) return;
-
-      try {
-        // 模拟API调用
-        const res = axios.get("api/friends/search/user",{
-              params:{"phone":this.contactSearch}
-            }
-        ).then(res => {
-          if (res.data.code === 200) {
-            this.searchResult = res.data.data;
-            this.showResultLayer = true;
-            console.log(this.searchResult);
-          }else {
-          }
-          console.log(res)
-        })
-      } catch (error) {
-        this.searchResult = null;
-        this.showResultLayer = true;
-      }
-    },
-
-    // 显示用户卡片
-    showUserCard(user) {
-      this.currentSearchUser = user;
-      this.showResultLayer = false;
-
-      // 检查好友状态
-      // try {
-      //   const res =  this.$http.get(`/api/friend-status/${user.id}`);
-      //   this.isFriend = res.data.isFriend;
-        //请求查看当前搜索用户是否为当前用户的好友
-      this.showUserDialog = true
-      axios.post("api/friends/search/isFriend", this.currentSearchUser
-
-      ).then(res => {
-        if (res.data.code === 200) {
-          this.isFriend = true
-        }else {
-          this.isFriend = false
-        }
-        console.log(res)
-      })
-    // } catch (error) {
-    //   this.searchResult = null;
-    //   this.showResultLayer = true;
-    // }
-      // } catch (error) {
-      //   console.error('获取好友状态失败');
-      // }
-    },
-    //展示所有的用户申请列表
-    showNewFriendList(){
-      this.getAllRequests()
-        //新好友列表弹窗
-      this.showDialog = true
-
-    },
-    //关闭查看所有好友申请弹窗
-    closeApply(){
-      this.showDialog = false
-    },
-    // 关闭申请弹窗
-    closeDialog() {
-      this.showUserDialog = false;
-      this.currentSearchUser = {};
-    },
-
-
-
-
-
-    // 提交好友申请
-    handleSubmitApply() {
-      try {
-        axios.post('/api/friends/friend-apply', {
-          applyUserId: this.currentSearchUser.id,
-          reason:this.applyReason,
-        }).then(res => {
-          console.log(res)
-        });
-
-        this.$message.success('好友申请已发送');
-        this.showAddFriendForm = false;
-      } catch (error) {
-        this.$message.error('发送失败，请重试');
-      }
-    },
-
-    // 进入好友申请表单
-    enterAddFriend() {
-      this.showAddFriendForm = true;
-      this.applyReason = '';
-    },
-    generateMockMessage() {
-      const messages = [
-        '你好，今天有空吗？',
-        '项目文档已更新',
-        '[图片]',
-        '[文件]',
-        '明天会议时间确认？'
-      ]
-      return messages[Math.floor(Math.random() * messages.length)]
-    },
-    updateTab(tab){
-      this.activeTab = tab
-      console.log(this.activeTab)
-      if (this.activeTab === "contact") {
-        this.searchAllFriends()
-      }else if (this.activeTab === "message") {
-        this.searchUserMessage()
-      }
-    },
-    //搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
-    searchAllFriends(){
-      axios.get("api/friends/all").then(res => {
-        console.log(res)
-        this.filteredContacts = res.data;
-        console.log(this.filteredContacts)
-      })
-    },
-    formatTime(timestamp) {
-      const date = new Date(timestamp)
-      const hours = date.getHours().toString().padStart(2, '0')
-      const minutes = date.getMinutes().toString().padStart(2, '0')
-      return `${hours}:${minutes}`
-    },
-
-    send() {
-      if (this.currentUser!=null){
-        if (!this.newMessage.content.trim()) {
-          this.$message.warning('请输入聊天内容')
-          return
-        }
-        this.newMessage.message = this.newMessage.content.trim()
-        if (this.loginUser.id == null) {
-          this.$message.error('登录用户编号获取失败,请重新登录!')
-          return
-        }
-        if (this.loginUser.id  === this.currentUser.id) {
-          this.$message.error('不能给自己发送信息!')
-          return
-        }
-        this.newMessage.sendUser = this.loginUser.id
-        this.newMessage.receiveUser = this.currentUser.id
-        this.newMessage.chatType = "private"
-        if (typeof (WebSocket) == "undefined") {
-          console.log("您的浏览器不支持WebSocket");
-        } else {
-          console.log("您的浏览器支持WebSocket");
-          // 组装待发送的消息 json
-          // {"from": "zhang", "to": "admin", "text": "聊天文本"}
-          // let message = {from: this.user.username, to: this.chatUser, text: this.text}
-          console.log(this.newMessage);
-          console.log(typeof (this.newMessage.sendUser));
-          console.log(typeof (this.newMessage.receiveUser));
-          console.log(this.newMessage);
-          socket.send(JSON.stringify(this.newMessage));  // 将组装好的json发送给服务端，由服务端进行转发
-          // this.messages.push({user: this.user.username, text: this.text})
-          // 构建消息内容，本人消息
-          // this.createContent(null, this.user.username, this.text)
-          // this.text = '';
-          axios.post("/api/chat/send", this.newMessage).then(res => {
-            console.log(res)
-            console.log(this.currentUser)
-            const message = {
-              chatType: 0,
-              user: this.currentUser
-            }
-            this.chooseUser(message)
-            this.searchUserMessage() //更新当前最新消息
-          })
-        }
-      }else {
-        console.log("发送群聊id",this.currentGroupId);
-        if (!this.newMessage.content.trim()) {
-          this.$message.warning('请输入聊天内容')
-          return
-        }
-        this.newMessage.message = this.newMessage.content.trim()
-        if (this.loginUser.id == null) {
-          this.$message.error('登录用户编号获取失败,请重新登录!')
-          return
-        }
-        this.newMessage.sendUser = this.loginUser.id
-        this.newMessage.groupId = this.currentGroupId
-        this.newMessage.chatType = "group"
-        if (typeof (WebSocket) == "undefined") {
-          console.log("您的浏览器不支持WebSocket");
-        } else {
-          console.log("您的浏览器支持WebSocket");
-          // 组装待发送的消息 json
-          // {"from": "zhang", "to": "admin", "text": "聊天文本"}
-          // let message = {from: this.user.username, to: this.chatUser, text: this.text}
-          console.log(this.newMessage);
-          socket.send(JSON.stringify(this.newMessage));  // 将组装好的json发送给服务端，由服务端进行转发
-          // this.messages.push({user: this.user.username, text: this.text})
-          // 构建消息内容，本人消息
-          // this.createContent(null, this.user.username, this.text)
-          // this.text = '';
-          axios.post("/api/chat/send", this.newMessage).then(res => {
-            console.log(res)
-            console.log(this.currentUser)
-            const message = {
-              chatType: 1,
-              group:{
-                groupId: this.currentGroupId,
-              }
-            }
-            this.chooseUser(message)
-            this.searchUserMessage() //更新当前最新消息
-          })
-        }
-      }
-
-
-    },
-    createContent(remoteUser, nowUser, text) {  // 这个方法是用来将 json的聊天消息数据转换成 html的。
-      let html
-      // 当前用户消息
-      if (nowUser) { // nowUser 表示是否显示当前用户发送的聊天消息，绿色气泡
-        html = "<div class=\"el-row\" style=\"padding: 5px 0\">\n" +
-            "  <div class=\"el-col el-col-22\" style=\"text-align: right; padding-right: 10px\">\n" +
-            "    <div class=\"tip left\">" + text + "</div>\n" +
-            "  </div>\n" +
-            "  <div class=\"el-col el-col-2\">\n" +
-            "  <span class=\"el-avatar el-avatar--circle\" style=\"height: 40px; width: 40px; line-height: 40px;\">\n" +
-            "    <img src=\"https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png\" style=\"object-fit: cover;\">\n" +
-            "  </span>\n" +
-            "  </div>\n" +
-            "</div>";
-      } else if (remoteUser) {   // remoteUser表示远程用户聊天消息，蓝色的气泡
-        html = "<div class=\"el-row\" style=\"padding: 5px 0\">\n" +
-            "  <div class=\"el-col el-col-2\" style=\"text-align: right\">\n" +
-            "  <span class=\"el-avatar el-avatar--circle\" style=\"height: 40px; width: 40px; line-height: 40px;\">\n" +
-            "    <img src=\"https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png\" style=\"object-fit: cover;\">\n" +
-            "  </span>\n" +
-            "  </div>\n" +
-            "  <div class=\"el-col el-col-22\" style=\"text-align: left; padding-left: 10px\">\n" +
-            "    <div class=\"tip right\">" + text + "</div>\n" +
-            "  </div>\n" +
-            "</div>";
-      }
-      console.log(html)
-      this.content += html;
-    },
-    //搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
-    searchUserForForm(){
-      axios.get("api/chat/allChat",{
-        params:{"sendUserId":this.loginUser.id,
-          "searchUserName":this.searchUserName
-        }
-      }).then(res => {
-        console.log(res)
-        this.showSearchResult = true
-        this.searchMessageForm = res.data.data;
-        console.log(this.searchMessageForm)
-      })
-    },
-    //搜索当前用户发过的消息和接受到的消息，根据最后一条消息时间倒序排序
-    searchUserMessage(){
-      axios.get("api/chat/allChatUser").then(res => {
-        console.log(res)
-        this.curAllMessage = res.data.data;
-        console.log(this.curAllMessage)
-        // this.showSearchResult = true
-        // this.searchMessageForm = res.data.data;
-        // console.log(this.searchMessageForm)
-      })
-    },
-    handleSearchInput(val) {
-      if (!val) {
-        this.showSearchResult = false
-      }
-    },
-    handleSelectUser(user) {
-      const message = {
-        chatType: 0,
-        user: user
-      }
-      this.chooseUser(message)
-      this.showSearchResult = false
-      this.searchUserName = ''
-    },
-
-    chooseUser (message) {
-      console.log(message)
-      const type = message.chatType
-      if (type === 0){
-        this.messageType = 0 //设置当前类型为单聊消息 用于区分右侧消息内容
-        console.log(111)
-        this.currentUser = message.user //当前为单聊设置发送对象user
-        this.currentGroupId = "" //当前设置群聊为空
-        console.log("当前选择群聊",this.currentGroupId)
-        console.log("当前选择聊天对象",this.currentUser)
-        this.fetchMessages(message.user.id)
-      }else if(type === 1){
-        this.messageType = 1 //设置当前类型为单聊消息 用于区分右侧消息内容
-        this.currentUser = null //当前为单聊设置发送对象null
-        this.currentGroupId = message.group.groupId //当前设置群聊为空
-        console.log("当前选择群聊",this.currentGroupId)
-        console.log("当前选择聊天对象",this.currentUser)
-        this.fetchMessagesGroup(message.group.groupId)
-      }
-
-    },
-    //更新消息列表单聊
-    fetchMessages(userId) {
-      axios.get("api/chat/oneChat",{
-        params:{"sendUserId":this.loginUser.id,
-          "receiveUserId":userId
-        }
-      }).then(res => {
-        this.messages = res.data.data[0].chatContents
-        console.log(this.messages)
-          // 将聊天记录总下拉到最下方
-          this.$nextTick(() => {
-            this.scrollToBottom()
-          })
-      })
-    },
-    //更新消息列表群聊
-    fetchMessagesGroup(groupId) {
-      console.log(groupId)
-      axios.get("api/chat/groupChat",{
-        params:{"groupId":groupId,
-        }
-      }).then(res => {
-        // this.messages = res.data.data[0].chatContents
-        console.log(res)
-        this.groupMessages = res.data.data
-        // 将聊天记录总下拉到最下方
-        this.$nextTick(() => {
-          this.scrollToBottom()
-        })
-      })
-    },
-    //获取所有的好友请求
-    getAllRequests(userId) {
-      axios.get("api/friends/requests/all",{
-        params:{"sendUserId":this.loginUser.id,
-          "receiveUserId":userId
-        }
-      }).then(res => {
-        console.log(res.data)
-        this.friendApplications = res.data
-      })
-    },
-    //获取所有未处理的好友请求
-    getAllPending(userId) {
-      axios.get("api/friends/requests/all/getPending",{
-        params:{"sendUserId":this.loginUser.id,
-          "receiveUserId":userId
-        }
-      }).then(res => {
-        // this.messages = res.data.data[0].chatContents
-        // console.log(this.messages)
-        // // 将聊天记录总下拉到最下方
-        // this.$nextTick(() => {
-        //   this.scrollToBottom()
-        // })
-        console.log(res.data)
-        this.unreadApply = res.data.length
-        console.log(this.unreadApply)
-      })
-    },
-
-    /*同意和拒绝好友*/
-    handleApply(requestid,accept){
-      axios.put(`api/friends/requests/${requestid}?accept=${accept}`,{
-        "accept":accept,
-      }).then(res => {
-        console.log(res.data)
-        this.friendApplications = res.data
-        this.showDialog = false
-      })
-    },
-/*发起群聊*/
-    newChatGroup(){
-      this.searchAllFriends()
-      this.showNewgroup=true
-      console.log("333")
-      console.log(this.filteredContacts)
-      console.log(this.filteredContacts)
-
-    },
-
-    // 判断是否已选中
-    isSelected(friend) {
-      return this.selectedFriends.some(f =>
-          f.friendUser.id === friend.friendUser.id
-      );
-    },
-
-    // 切换选择状态
-    toggleSelection(friend) {
-      const index = this.selectedFriends.findIndex(f =>
-          f.friendUser.id === friend.friendUser.id
-      );
-      console.log(index, friend)
-      if (index > -1) {
-        this.selectedFriends.splice(index, 1);
-      } else {
-        this.selectedFriends.push(friend);
-      }
-    },
-    // 移除单个好友
-    removeFriend(index) {
-      this.selectedFriends.splice(index, 1);
-    },
-
-    // 清空所有选择
-    clearAll() {
-      this.selectedFriends = [];
-    },
-
-    // 创建群组
-    createGroup(){
-      if (!this.groupName) {
-        alert('请填写群聊名称');
-        return;
-      }
-      if (this.selectedFriends.length < 1) {
-        alert('请至少选择一位成员');
-        return;
-      }
-
-      const payload = {
-        groupName: this.groupName,
-        member: this.selectedFriends.map(f => f.friendUser)
-      };
-
-      // 调用API
-      console.log('提交数据:', payload);
-      this.$emit('create', payload);
-      axios.post("api/group/create",payload).then(res => {
-
-        console.log(res.data)
-      })
-      this.clearAll();
-      this.groupName = '';
-      //关闭弹窗
-      this.showNewgroup = false;
-    },
-    // 消息过多的时候滚动到最新消息位置
-    scrollToBottom () {
-      // 使用 $refs 来获取对消息容器的引用
-      const container = this.$refs.messageContainer
-      console.log(container)
-      var assign = Object.assign({}, container);
-      console.log(assign);
-      console.log(assign.wrapRef);
-      assign.wrapRef.scrollTop=100000
-      // console.log(container.scrollHeight)
-      // messageContainer.value.wrapRef.scrollTop = messageContainer.value.wrapRef.scrollHeight;
-      //
-      // .$refs.wrap
-      // 滚动到底部
-      // container.scrollTop = 900
-    },
-
-    init() {
-
-      console.log(window.sessionStorage.getItem("user"))
-      this.user = window.sessionStorage.getItem("user")
-      if (this.user){
-        console.log(window.sessionStorage.getItem("user"))
-        this.user = {"userId":window.sessionStorage.getItem("user")}
-        console.log(this.user)
-        let userId = this.user.userId;
-        let _this = this;
-        if (typeof (WebSocket) == "undefined") {
-          console.log("您的浏览器不支持WebSocket");
-        } else {
-          console.log("您的浏览器支持WebSocket");
-          console.log("当前登录用户"+userId)
-          let socketUrl = "ws://localhost:8081/imserver/" + userId;
-          // if (socket != null) {
-          //   socket.close();
-          //   socket = null;
-          // }
-          // 开启一个websocket服务
-          socket = new WebSocket(socketUrl);
-          //打开事件
-          socket.onopen = function () {
-            console.log("websocket已打开");
-          };
-          //  浏览器端收消息，获得从服务端发送过来的文本消息
-          socket.onmessage = (msg) => {
-            console.log("收到数据====" + msg.data)
-            console.log(typeof msg.data)
-            var data_new = JSON.parse(msg.data);
-            const type = data_new.type //收到消息类型 2 用户之间发送的消息 1 好友之前处理消息
-            console.log(type)
-            if (type === 2){
-              console.log(data_new);
-              axios.get("api/chat/oneChat",{
-                params:{"sendUserId":data_new.receiveUserId,
-                  "receiveUserId":data_new.sendUserId
-                }
-              }).then(res => {
-                this.messages = res.data.data[0].chatContents
-                console.log(this.messages)
-                //浏览器接受服务端返回的消息 接收方更新消息列表
-                this.searchUserMessage()
-                // 将聊天记录总下拉到最下方
-                this.$nextTick(() => {
-                  this.scrollToBottom()
-                })
-              })
-            }else if(type === 1){ //处理用户之前请求好友关系
-                setTimeout(() => {
-                  this.$message.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
-                  this.$message.success('验证理由'+data_new.content);
-                }, 3000)
-              //1，更新用户处理中的好友数量 数量=/requests/all/getPending.length
-                this.getAllPending()
-              //2，用户新的朋友列表请求所有的请求的朋友列表，通过或者拒绝的好友右边显示状态和理由 未处理过的显示通过和拒绝按钮
-              //3，用户点击同意 发送消息给服务端同意 同时把消息存储进消息db 新建一条“通过了您的好友”消息 同时消息列表更新
-            }else if(type === 3){
-
-              this.searchUserMessage()
-              this.updateTab('message')
-              //发送请求得展示申请的情况
-              //接受者展示处理情况
-
-            }else if(type === 4){
-              console.log("处理群聊消息")
-              console.log(data_new)
-              //更新群聊消息
-              this.fetchMessagesGroup(data_new.groupId);
-              //更新最后消息列表
-              this.searchUserMessage()
-              // 将聊天记录总下拉到最下方
-              this.$nextTick(() => {
-                this.scrollToBottom()
-              })
-            }
-
-
-          };
-          //关闭事件
-          socket.onclose = function () {
-            console.log("websocket已关闭");
-          };
-          //发生了错误事件
-          socket.onerror = function () {
-            console.log("websocket发生了错误");
-          }
-        }
-      }else {
-
-      }
-
-    }
-  }
-}
 </script>
 <style scoped>
 
