@@ -1,28 +1,46 @@
-import axios from 'axios'
+// plugins/axios.ts
+import axios from 'axios';
+import { useUserStore } from '../store/token.ts';
+import router from '../router'; // 直接导入路由实例
+import { useRouter } from 'vue-router';
 
-const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-    timeout: 10000
-})
+const baseURL = '/api';
+const instance = axios.create({  })
 
-// 请求拦截器
 instance.interceptors.request.use(config => {
-    const token = localStorage.getItem('token')
+    const userStore = useUserStore(); // 获取Pinia store实例
+    const token = sessionStorage.getItem("token"); // 从store获取token
+    console.log(token)
     if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-})
+        console.log("router.push");
+        config.headers['Authorization'] = token; // 设置请求头中的Authorization字段
+        // router.replace({
+        //     path: '/',
+        //     query: {
+        //         _t: Date.now()
+        //     },
+        // });
 
-// 响应拦截器
-instance.interceptors.response.use(
-    response => response.data,
-    error => {
-        if (error.response?.status === 401) {
-            // 处理未授权
-        }
-        return Promise.reject(error)
-    }
-)
+    }else {
+        console.log("未找到token")
+        router.replace({
+            path: '/',
+            query: {
+                _t: Date.now()
+            },
+        });
+        // 清除残留的无效token
+        // userStore.clearToken();
 
-export default instance
+
+
+        // 中断请求链
+        //路由到登录网页
+    }
+    console.log(333);
+    console.log()
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
+export default instance;
