@@ -654,6 +654,7 @@ export default {
       text: "",
       content: '',
       currentUser: null, // 当前聊天的人
+      currentGroupId: "", // 当前聊天的群
       currentSearchUser: null, // 当前搜索的用户
       loginUser: null,
       messages: [], //单聊消息
@@ -667,7 +668,9 @@ export default {
         sendUser: '',
         receiveUser: '',
         message: '',
-        is_read: '0',
+        notRead: '0',
+        chatType:'private', //聊天对象 private 单聊 group 群聊
+        groupId: '', //扩展群聊id
         createTime: '',
         updateTime: '',
       },
@@ -917,24 +920,32 @@ export default {
         this.newMessage.chatType = "group"
         if (typeof (WebSocket) == "undefined") {
           console.log("您的浏览器不支持WebSocket");
-      } else {
+        } else {
           console.log("您的浏览器支持WebSocket");
           // 组装待发送的消息 json
           // {"from": "zhang", "to": "admin", "text": "聊天文本"}
           // let message = {from: this.user.username, to: this.chatUser, text: this.text}
-        console.log(this.newMessage);
-        socket.send(JSON.stringify(this.newMessage));  // 将组装好的json发送给服务端，由服务端进行转发
+          console.log(this.newMessage);
+          socket.send(JSON.stringify(this.newMessage));  // 将组装好的json发送给服务端，由服务端进行转发
           // this.messages.push({user: this.user.username, text: this.text})
           // 构建消息内容，本人消息
           // this.createContent(null, this.user.username, this.text)
           // this.text = '';
-        axios.post("/api/chat/send", this.newMessage).then(res => {
-          console.log(res)
-          console.log(this.currentUser)
-          this.chooseUser(this.currentUser)
-          this.searchUserMessage() //更新当前最新消息
-        })
+          axios.post("/api/chat/send", this.newMessage).then(res => {
+            console.log(res)
+            console.log(this.currentUser)
+            const message = {
+              chatType: 1,
+              group:{
+                groupId: this.currentGroupId,
+              }
+            }
+            this.chooseUser(message)
+            this.searchUserMessage() //更新当前最新消息
+          })
         }
+      }
+
 
     },
     createContent(remoteUser, nowUser, text) {  // 这个方法是用来将 json的聊天消息数据转换成 html的。
@@ -1042,19 +1053,19 @@ export default {
       })
     },
     //更新消息列表群聊
-    fetchMessagesGroup(group) {
-      console.log(group)
+    fetchMessagesGroup(groupId) {
+      console.log(groupId)
       axios.get("api/chat/groupChat",{
-        params:{"groupId":group.groupId,
+        params:{"groupId":groupId,
         }
       }).then(res => {
         // this.messages = res.data.data[0].chatContents
         console.log(res)
         this.groupMessages = res.data.data
         // 将聊天记录总下拉到最下方
-        // this.$nextTick(() => {
-        //   this.scrollToBottom()
-        // })
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
       })
     },
     //获取所有的好友请求
@@ -1246,6 +1257,17 @@ export default {
               //发送请求得展示申请的情况
               //接受者展示处理情况
 
+            }else if(type === 4){
+              console.log("处理群聊消息")
+              console.log(data_new)
+              //更新群聊消息
+              this.fetchMessagesGroup(data_new.groupId);
+              //更新最后消息列表
+              this.searchUserMessage()
+              // 将聊天记录总下拉到最下方
+              this.$nextTick(() => {
+                this.scrollToBottom()
+              })
             }
 
 
