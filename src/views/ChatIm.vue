@@ -670,7 +670,7 @@ let   newMessage=ref({
 })
 let searchUserName=ref('')
 let  showSearchResult=ref(false)
-let groupName = ref('')
+let groupName = ref('') //群名称
 // 状态管理
 // const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
