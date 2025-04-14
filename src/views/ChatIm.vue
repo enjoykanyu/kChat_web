@@ -670,7 +670,7 @@ let   newMessage=ref({
 })
 let searchUserName=ref('')
 let  showSearchResult=ref(false)
-
+let groupName = ref('')
 // 状态管理
 // const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
@@ -1079,6 +1079,7 @@ const clearAll=()=> {
 
 // 创建群组
 const createGroup=()=>{
+  console.log(groupName.value)
   if (!groupName.value) {
     alert('请填写群聊名称');
     return;
@@ -1095,11 +1096,13 @@ const createGroup=()=>{
 
   // 调用API
   console.log('提交数据:', payload);
-  this.$emit('create', payload);
+  // this.$emit('create', payload);
   request.post("api/group/create",payload).then(res => {
 
     console.log(res.data)
   })
+  //更新最后消息列表
+  searchUserMessage()
   clearAll();
   groupName.value = '';
   //关闭弹窗
@@ -1203,6 +1206,9 @@ const init=() =>{
           nextTick(() => {
             scrollToBottom()
           })
+        }else if (type === 5){//新建群聊广播群成员
+          //更新最后消息列表
+          searchUserMessage()
         }
 
 
