@@ -135,7 +135,7 @@
                 <!-- 操作按钮 -->
                 <div class="action-buttons">
                   <template v-if="isFriend">
-                    <button class="btn primary">发消息</button>
+                    <button class="btn primary" @click="handleSelectUser(currentSearchUser)">发消息</button>
                     <button class="btn">视频通话</button>
                     <button class="btn">语音通话</button>
                   </template>
@@ -261,6 +261,7 @@
               </span>
                 </div>
               </div>
+              <div v-if="friendApplications.length <= 0"> 暂无好友申请 </div>
             </div>
           </div>
         </div>
