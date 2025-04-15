@@ -547,13 +547,25 @@
     <!-- Right side: Chat box -->
     <div class="right-side">
       <!-- Chat header -->
-      <div class="chat-header">
+      <div class="chat-header" style="display: flex; align-items: center; justify-content: space-between;">
         <!--        :class="{ 'long-name': currentUser.userName.length > 6 }" -->
-        <span v-if="currentUser" class="username-wrap"
-        >{{ currentUser.userName }}</span>
+
+        <div v-if="currentGroup">
+           <span  class="username-wrap"
+           >{{ currentGroup }}</span>💬
+        </div>
+       <div v-else>
+         <span class="username-wrap">{{ currentUser.userName }}
+        </span>
+       </div>
+
         <!--        <span v-if="currentGroupId" class="username-wrap"
                       :class="{ 'long-name': currentUser.userName.length > 6 }">{{ currentUser.userName }}</span>
-           -->   </div>
+           -->
+        <el-icon class="header-icon" @click="groupconfig">
+        <MoreFilled />
+      </el-icon>
+      </div>
       <!-- Chat messages -->
       <el-scrollbar class="chat-messages" ref="messageContainer">
         <div v-if="messageType==0">
@@ -597,6 +609,39 @@
             class="send-button"
         >发送</el-button>
       </div>
+      <!-- 抽屉内容 -->
+      <div class="drawer-mask" v-show="drawerVisible" @click="drawerVisible = false"></div>
+      <div class="drawer-container" :class="{ show: drawerVisible }">
+        <div class="drawer-content">
+          <!-- 群聊内容 -->
+          <template v-if="currentGroup">
+            <div class="group-title">群聊设置</div>
+            <div class="member-list">
+              <div v-for="member in groupMembers" :key="member.id" class="member-item">
+                <img :src="member.avatar" class="member-avatar"/>
+                <span>{{ member.userName }}</span>
+              </div>
+            </div>
+            <div class="action-list">
+              <div class="action-item" @click="clearChat">清空聊天记录</div>
+              <div class="action-item text-danger" @click="quitGroup">退出群聊</div>
+            </div>
+          </template>
+
+          <!-- 私聊内容 -->
+          <template v-else>
+            <div class="user-info">
+              <img :src="currentUser.avatar" class="user-avatar"/>
+              <div class="user-name">{{ currentUser.userName }}</div>
+            </div>
+            <div class="action-list">
+              <div class="action-item" @click="clearChat">清空聊天记录</div>
+              <div class="action-item" @click="deleteFriend">删除好友</div>
+              <div class="action-item text-danger" @click="addBlacklist">加入黑名单</div>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -624,7 +669,8 @@ import {
   Picture,
   Setting
 } from '@element-plus/icons-vue'
-
+let groupMembers = ref([])//当前群成员
+let  drawerVisible = ref(false) //群设置和单聊设置弹窗
 let showNewgroup = ref(false)
 let friendApplications=ref([]) //申请好友列表
 let  showDialog=ref(false) // 好友申请控制弹窗显示
@@ -649,7 +695,8 @@ let   chatUser=ref('')
 let    text=ref("")
 let    content=ref('')
 let   currentUser=reactive({})// 当前聊天的人
-let    currentGroupId=ref("") // 当前聊天的群
+let    currentGroupId=ref("") // 当前聊天的群id
+let currentGroup = ref('') // 当前聊天的群
 let    currentSearchUser=reactive({}) // 当前搜索的用户
 let    loginUser=reactive({})
 let    messages=ref([]) //单聊消息
@@ -905,6 +952,18 @@ const send=()=> {
   }
 
 
+}
+//当前群聊设置
+const groupconfig =()=>{
+  drawerVisible.value = true
+  request.get("api/group/getGroupMember",{
+    params:{"groupId":currentGroupId.value,
+    }
+  }).then(res => {
+    console.log(res)
+    groupMembers.value = res.data.data
+    console.log(groupMembers.value)
+  })
 }
 //搜索当前用户所有信息 请求后端完成则更新所有用户信息保存到前端数据 拿到所有信息 from_user:发送者 send_user:接受者 create_time 发送消息时间 is_read 是否已读 message_id 消息id message_content 消息内容
 const searchUserForForm=()=>{
@@ -1333,14 +1392,19 @@ onMounted(() => {
     max-width: none;
   }
 }*/
-.user-list-scroll {
+/*.user-list-scroll {
   top: 40px;
   overflow-y: auto;
+  !*
   height: calc(100% - 56px);
+  *!
+  height: 100%;
+  !*
   position: relative;
+  *!
   z-index: 1;
 
-}
+}*/
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s;
 }
@@ -1516,10 +1580,10 @@ onMounted(() => {
   gap: 8px; /* 元素间距 */
 }
 
-.user-list-scroll {
+/*.user-list-scroll {
   flex: 1;
   overflow: hidden;
-}
+}*/
 /*
  //min-width: 400px;
  */
@@ -2911,5 +2975,90 @@ label {
       }
     }
   }
+}
+/* 抽屉样式 */
+.drawer-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  transition: opacity 0.3s;
+}
+
+.drawer-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: white;
+  transform: translateX(100%);
+  transition: transform 0.3s;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.drawer-container.show {
+  transform: translateX(0);
+}
+
+.drawer-content {
+  padding: 16px;
+}
+
+/* 群成员样式 */
+.group-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.member-item {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.member-item:hover {
+  background: #f5f5f5;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  margin-right: 12px;
+}
+
+
+
+/* 操作列表样式 */
+.action-list {
+  margin-top: 20px;
+}
+
+.action-item {
+  padding: 12px;
+  border-radius: 6px;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+.action-item:hover {
+  background: #f5f5f5;
+}
+
+.text-danger {
+  color: #ff4d4f;
+}
+
+.action-item + .action-item {
+  margin-top: 8px;
 }
 </style>
