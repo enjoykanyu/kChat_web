@@ -768,7 +768,7 @@ const handleSubmitApply=()=> {
     }).then(res => {
       console.log(res)
     });
-
+    showUserDialog.value = false
     this.$message.success('好友申请已发送');
     showAddFriendForm.value = false;
   } catch (error) {
@@ -943,7 +943,9 @@ const handleSelectUser=(user)=>{
   }
   chooseUser(message)
   showSearchResult.value = false
+  showUserDialog.value = false
   searchUserName.value = ''
+  activeTab.value = 'message'
 }
 
 const chooseUser= (message) =>{
@@ -955,16 +957,20 @@ const chooseUser= (message) =>{
     console.log(111)
     currentUser = message.user //当前为单聊设置发送对象user
     currentGroupId.value = "" //当前设置群聊为空
+    currentGroup.value = ''
     console.log("进入了单聊if当前选择群聊",currentGroupId.value)
     console.log("进入了单聊if当前选择聊天对象",currentUser.valueOf())
     fetchMessages(message.user.id)
   }else if(type === 1){
     messageType.value = 1 //设置当前类型为单聊消息 用于区分右侧消息内容
     currentUser = {} //当前为单聊设置发送对象null
+    console.log(message.group)
     currentGroupId.value = message.group.groupId //当前设置群聊为空
     console.log("进入了群聊if当前选择群聊",currentGroupId.value)
     console.log("进入了群聊if当前选择聊天对象",currentUser)
     fetchMessagesGroup(message.group.groupId)
+    currentGroup.value = message.group.groupName //更新当前聊天群对象
+    console.log(currentGroup)
   }
 
 }
