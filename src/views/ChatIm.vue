@@ -1049,6 +1049,8 @@ const handleApply =(requestid,accept)=>{
 const newChatGroup=()=>{
   searchAllFriends()
   showNewgroup.value=true
+  //更新最后消息列表
+  // searchUserMessage()
   console.log("333")
   console.log(filteredContacts.value)
   console.log(filteredContacts.value)
@@ -1107,9 +1109,10 @@ const createGroup=()=>{
   request.post("api/group/create",payload).then(res => {
 
     console.log(res.data)
+    //更新最后消息列表
+    searchUserMessage()
   })
-  //更新最后消息列表
-  searchUserMessage()
+
   clearAll();
   groupName.value = '';
   //关闭弹窗
