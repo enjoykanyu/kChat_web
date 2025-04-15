@@ -2285,6 +2285,7 @@ onMounted(() => {
 /* 添加以下样式 */
 .left-chat-container {
   width: 100%; /* 统一容器宽度 */
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -2294,13 +2295,19 @@ onMounted(() => {
 }*/
 
 .user-list-scroll {
-  height: 500px; /* 固定高度 */
+  overflow-y: auto;
+  /*
+  height: calc(100% - 56px);
+  */
+  position: relative;
+  height: 1000px; /* 固定高度 */
   width: 100%;
-
+  z-index: 3;
   /* 统一滚动条样式 */
   .el-scrollbar__wrap {
-    padding: 0 12px;
+    padding: 3 33;
     box-sizing: border-box;
+    max-height: 100% !important; /* 覆盖 Element 默认高度限制 */
   }
 }
 
