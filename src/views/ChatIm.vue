@@ -893,7 +893,6 @@ const send=()=> {
       console.log(typeof (newMessage.value.sendUser));
       console.log(typeof (newMessage.value.receiveUser));
       console.log(newMessage.value);
-      socket.send(JSON.stringify(newMessage.value));  // 将组装好的json发送给服务端，由服务端进行转发
       // this.messages.push({user: this.user.username, text: this.text})
       // 构建消息内容，本人消息
       // this.createContent(null, this.user.username, this.text)
@@ -901,12 +900,22 @@ const send=()=> {
       request.post("/api/chat/send", newMessage.value).then(res => {
         console.log(res)
         console.log(currentUser)
-        const message = {
-          chatType: 0,
-          user: currentUser
+        if (res.data.code === 200) { //仅为当前好友且未删除和拉进黑名单可发送消息
+          const message = {
+            chatType: 0,
+            user: currentUser
+          }
+          socket.send(JSON.stringify(newMessage.value));  // 将组装好的json发送给服务端，由服务端进行转发
+          chooseUser(message)
+          searchUserMessage() //更新当前最新消息
+        }else if(res.data.code === 100007) { //你删除了改好友或者该好友删除了你，发送系统消息“当前用户还不是你的好友，发送失败” 这个消息只有发送者可以看到
+
+        }else if(res.data.code === 100008) {
+          //你拉黑了对方
+        }else if(res.data.code === 200004) {
+          //对方拉黑了你
         }
-        chooseUser(message)
-        searchUserMessage() //更新当前最新消息
+
       })
     }
   }else {
