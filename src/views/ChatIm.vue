@@ -1023,7 +1023,10 @@ const chooseUser= (message) =>{
 
     messageType.value = 0 //设置当前类型为单聊消息 用于区分右侧消息内容
     console.log(111)
-    currentUser = message.user //当前为单聊设置发送对象user
+    // currentUser = message.user //当前为单聊设置发送对象user
+    // 通过 Object.assign 更新属性而非覆盖对象
+    Object.assign(currentUser, message.user);
+    console.log(currentUser)
     currentGroupId.value = "" //当前设置群聊为空
     currentGroup.value = ''
     console.log("进入了单聊if当前选择群聊",currentGroupId.value)
