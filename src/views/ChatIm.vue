@@ -1307,6 +1307,33 @@ const init=() =>{
   }
 
 }
+//单向删除好友
+const deleteFriend =()=>{
+  console.log(currentUser)
+  request.post(`api/friends/delete?friendId=${currentUser.id}`).then(
+          res => {
+            console.log(res)
+            loginUser = res.data.data
+            console.log(loginUser)
+          }
+      )
+}
+
+
+
+
+//单向拉黑好友
+const addBlacklist =()=>{
+  request.post("api/friends/black",{
+    "friendId":currentUser.friendId
+  }).then(
+      res => {
+        console.log(res)
+        loginUser = res.data.data
+        console.log(loginUser)
+      }
+  )
+}
 const beforeCreate= ()=> {
   axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
   // 获取登录用户userId,请根据自己实际项目获取
