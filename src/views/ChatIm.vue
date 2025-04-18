@@ -650,6 +650,7 @@
 // import request from "@/utils/request";
 import axios from "axios";
 import request from '../utils/request.ts'
+import { ElMessageBox } from 'element-plus'
 
 let socket = null;
 import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw} from 'vue'
@@ -1311,8 +1312,10 @@ const init=() =>{
 
 }
 //单向删除好友
-const deleteFriend =()=>{
+const deleteFriend =async()=>{
   console.log(currentUser)
+  await ElMessageBox.confirm('确定删除该好友？', '警告', { type: 'warning' })
+
   request.post(`api/friends/delete?friendId=${currentUser.id}`).then(
           res => {
             console.log(res)
