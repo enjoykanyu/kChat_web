@@ -910,7 +910,7 @@ const send=()=> {
           chooseUser(message)
           searchUserMessage() //更新当前最新消息
         }else if(res.data.code === 100007) { //你删除了改好友或者该好友删除了你，发送系统消息“当前用户还不是你的好友，发送失败” 这个消息只有发送者可以看到
-
+          alert("对方不是你的好友，无法进行聊天");
         }else if(res.data.code === 100008) {
           //你拉黑了对方
         }else if(res.data.code === 200004) {
