@@ -18,7 +18,6 @@
         - UI样式 Css、ElementPlus
         - 网页路由 vue-router
         - 全双工通信框架Websocket
-          功能实现概况
 - 已实现功能
     - 用户登录
     - 用户注册
