@@ -9,7 +9,7 @@
             class="nav-item"
             :class="{ active: activeTab === 'profile' }"
             @click="updateTab('profile')">
-          <el-avatar :size="32" :src="loginUser.avatar" />
+          <el-avatar :size="32" :src="loginUser.avatar" class="user-avatar"/>
         </div>
 
         <!-- 消息 -->
@@ -18,12 +18,13 @@
             :class="{ active: activeTab === 'message' }"
             @click="updateTab('message')">
           <el-icon :size="26" class="nav-icon">
-            <Message />
+            <ChatDotRound />
           </el-icon>
           <el-badge
               v-if="totalUnread > 0"
               :value="totalUnread"
-              class="nav-badge" />
+              class="nav-badge"
+          />
         </div>
 
         <!-- 通讯录 -->
@@ -33,13 +34,13 @@
             @click="updateTab('contact')">
           <el-icon :size="26" class="nav-icon">
             <User />
-            <!-- 未读消息徽章 -->
-            <el-badge
-                :value="unreadApply"
-                v-if="3 > 0"
-                class="message-badge"
-            />
           </el-icon>
+          <!-- 未读消息徽章 -->
+          <el-badge
+              :value="unreadApply"
+              v-if="3 > 0"
+              class="message-badge"
+          />
         </div>
 
         <!-- 朋友圈 -->
@@ -287,80 +288,110 @@
             <!-- 新增独立图标按钮 -->
             <button class="add-btn" @click="newChatGroup">+</button>
           </div>
+          <!-- User list (with scroll) -->
+          <el-scrollbar class="user-list-scroll">
+            <el-row>
+              <el-col
+                  :span="24"
+                  v-for="(form, index) in curAllMessage"
+                  :key="index"
+                  @click.native="chooseUser(form)"
+                  @click="activeIndex = index"
+                  :class="{ 'active-item': activeIndex === index }"
+                  class="user-item"
+                  v-if="messageForm.length !== 0"
+              >
+                <div class="user-avatar-wrapper">
+                  <!-- 方形头像 -->
+                  <img
+                      :src="form.avatar"
+                      class="user-avatar"
+                  >
 
-          <!--          群聊弹窗按钮，后续再独立成单独的组件-->
-          <!-- 弹窗容器 -->
-          <!--          <div v-if="showNewgroup" class="dialog-mask">-->
-          <!--            <div class="dialog-wrapper">-->
-          <!--              &lt;!&ndash; 标题栏 &ndash;&gt;-->
-          <!--              <div class="dialog-header">-->
-          <!--                <h3>发起群聊</h3>-->
-          <!--                <span class="close-btn" @click="showDialog = false">×</span>-->
-          <!--              </div>-->
+                  <!-- 未读消息徽章 -->
+                  <el-badge
+                      :value="form.unreadCount"
+                      v-if="form.unreadCount > 0"
+                      class="message-badge"
+                  />
 
-          <!--              &lt;!&ndash; 内容区 &ndash;&gt;-->
-          <!--              <div class="dialog-body">-->
-          <!--                &lt;!&ndash; 群聊名称输入 &ndash;&gt;-->
-          <!--                <div class="input-group">-->
-          <!--                  <label>群聊名称</label>-->
-          <!--                  <input-->
-          <!--                      v-model="groupName"-->
-          <!--                      type="text"-->
-          <!--                      placeholder="请输入群聊名称"-->
-          <!--                      class="wechat-input"-->
-          <!--                  >-->
-          <!--                </div>-->
+                  <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
+                  <!--              <div-->
+                  <!--                  v-if="form.recieiveUser.isOnline"-->
+                  <!--                  class="online-dot"-->
+                  <!--              ></div>-->
+                </div>
 
-          <!--                &lt;!&ndash; 好友搜索选择 &ndash;&gt;-->
-          <!--                <div class="input-group">-->
-          <!--                  <label>添加成员</label>-->
-          <!--                  <div class="search-wrapper">-->
-          <!--                    <input-->
-          <!--                        v-model="searchKey"-->
-          <!--                        type="text"-->
-          <!--                        placeholder="搜索好友"-->
-          <!--                        class="wechat-input"-->
-          <!--                        @input="filterFriends"-->
-          <!--                    >-->
-          <!--                    <div class="friend-list">-->
-          <!--                      <div-->
-          <!--                          v-for="friend in filteredContacts"-->
-          <!--                          :key="friend.friendUser.id"-->
-          <!--                          class="friend-item"-->
-          <!--                      >-->
-          <!--                        &lt;!&ndash; 复选框前置 &ndash;&gt;-->
-          <!--                        <label class="checkbox-wrapper">-->
-          <!--                          <input-->
-          <!--                              type="checkbox"-->
-          <!--                              v-model="selectedFriends"-->
-          <!--                              :value="friend.friendUser.id"-->
-          <!--                              class="wechat-checkbox"-->
-          <!--                          >-->
-          <!--                          <span class="checkmark"></span> &lt;!&ndash; 自定义样式层 &ndash;&gt;-->
-          <!--                        </label>-->
+                <div class="user-details">
+                  <!-- 头部行容器 -->
+                  <div class="header-line">
+                    <div class="user-name ellipsis">{{ form.chatName }}</div>
+                    <div class="message-time">{{ formatTime(form.lastSendTime) }}</div>
+                  </div>
 
-          <!--                        <div class="user-avatar-wrapper">-->
-          <!--                          &lt;!&ndash; 方形头像 &ndash;&gt;-->
-          <!--                          <img-->
-          <!--                              :src="friend.friendUser.avatar"-->
-          <!--                              class="user-avatar"-->
-          <!--                          >-->
-          <!--                        </div>-->
+                  <!-- 最后消息 -->
+                  <div class="last-message ellipsis">
+                    <span :class="['last-message', { truncate: form.chatName.length>6 }]">
+                      {{ form.chatName }}
+                    </span>：
+                    {{ form.lastContent || "暂无消息" }}
+                  </div>
+                </div>
 
-          <!--                        <span>{{ friend.friendUser.userName }}</span>-->
-          <!--                      </div>-->
-          <!--                    </div>-->
-          <!--                  </div>-->
-          <!--                </div>-->
-          <!--              </div>-->
 
-          <!--              &lt;!&ndash; 操作按钮 &ndash;&gt;-->
-          <!--              <div class="dialog-footer">-->
-          <!--                <button class="cancel-btn" @click="showDialog = false">取消</button>-->
-          <!--                <button class="confirm-btn" @click="createGroup">发起群聊</button>-->
-          <!--              </div>-->
-          <!--            </div>-->
-          <!--          </div>-->
+              </el-col>
+            </el-row>
+            <!-- 搜索结果悬浮层 -->
+            <transition name="fade">
+              <el-scrollbar
+                  v-show="showSearchResult"
+                  class="user-list-scroll-search"
+                  :class="{ 'search-active': showSearchResult }"
+              >
+                <el-row>
+                  <el-col
+                      :span="24"
+                      v-for="form in searchMessageForm"
+                      :key="form.recieiveUser.id"
+                      @click.native="handleSelectUser(form.recieiveUser)"
+                      class="user-item"
+                  >
+                    <!-- 用户项结构（同原有内容） -->
+                    <div class="user-avatar-wrapper">
+                      <!-- 方形头像 -->
+                      <img
+                          :src="form.recieiveUser.avatar"
+                          class="user-avatar"
+                      >
+
+                      <!-- 未读消息徽章 -->
+                      <el-badge
+                          :value="form.noReadMessageLength"
+                          v-if="form.noReadMessageLength > 0"
+                          class="message-badge"
+                      />
+
+                      <!-- 在线状态指示 -->
+                      <div
+                          v-if="form.recieiveUser.isOnline"
+                          class="online-dot"
+                      ></div>
+                    </div>
+
+                    <div class="user-details">
+                      <div class="header-line">
+                        <div class="user-name">{{ form.recieiveUser.userName }}</div>
+                        <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
+                      </div>
+                      <div class="last-message">
+                        {{ form.lastMessage || "暂无消息" }}
+                      </div>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-scrollbar>
+            </transition>
+          </el-scrollbar>
           <!--新实现-->
           <div v-if="showNewgroup" class="dialog-mask">
             <div class="dialog-wrapper wechat-style">
@@ -442,104 +473,7 @@
               </div>
             </div>
           </div>
-          <!-- User list (with scroll) -->
-          <el-scrollbar class="user-list-scroll">
-            <!-- 搜索结果悬浮层 -->
-            <transition name="fade">
-              <el-scrollbar
-                  v-show="showSearchResult"
-                  class="user-list-scroll-search"
-                  :class="{ 'search-active': showSearchResult }"
-              >
-                <el-row>
-                  <el-col
-                      :span="24"
-                      v-for="form in searchMessageForm"
-                      :key="form.recieiveUser.id"
-                      @click.native="handleSelectUser(form.recieiveUser)"
-                      class="user-item"
-                  >
-                    <!-- 用户项结构（同原有内容） -->
-                    <div class="user-avatar-wrapper">
-                      <!-- 方形头像 -->
-                      <img
-                          :src="form.recieiveUser.avatar"
-                          class="user-avatar"
-                      >
 
-                      <!-- 未读消息徽章 -->
-                      <el-badge
-                          :value="form.noReadMessageLength"
-                          v-if="form.noReadMessageLength > 0"
-                          class="message-badge"
-                      />
-
-                      <!-- 在线状态指示 -->
-                      <div
-                          v-if="form.recieiveUser.isOnline"
-                          class="online-dot"
-                      ></div>
-                    </div>
-
-                    <div class="user-details">
-                      <div class="header-line">
-                        <div class="user-name">{{ form.recieiveUser.userName }}</div>
-                        <div class="message-time">{{ formatTime(form.lastMessageTime) }}</div>
-                      </div>
-                      <div class="last-message">
-                        {{ form.lastMessage || "暂无消息" }}
-                      </div>
-                    </div>
-                  </el-col>
-                </el-row>
-              </el-scrollbar>
-            </transition>
-            <el-row>
-              <el-col
-                  :span="24"
-                  v-for="form in curAllMessage"
-                  @click.native="chooseUser(form)"
-                  class="user-item"
-                  v-if="messageForm.length !== 0"
-              >
-                <div class="user-avatar-wrapper">
-                  <!-- 方形头像 -->
-                  <img
-                      :src="form.avatar"
-                      class="user-avatar"
-                  >
-
-                  <!-- 未读消息徽章 -->
-                  <el-badge
-                      :value="form.unreadCount"
-                      v-if="form.unreadCount > 0"
-                      class="message-badge"
-                  />
-
-                  <!--              &lt;!&ndash; 在线状态指示 &ndash;&gt;-->
-                  <!--              <div-->
-                  <!--                  v-if="form.recieiveUser.isOnline"-->
-                  <!--                  class="online-dot"-->
-                  <!--              ></div>-->
-                </div>
-
-                <div class="user-details">
-                  <div class="header-line">
-                    <div class="user-name">{{ form.chatName }}</div>
-                    <div class="message-time">{{ formatTime(form.lastSendTime) }}</div>
-                  </div>
-                  <div class="last-message">
-                          <span :class="['username', { truncate: form.chatName.length>6 }]">
-                      {{form.chatName}}
-                          </span>：
-                    {{ form.lastContent || "暂无消息" }}
-                  </div>
-                </div>
-
-
-              </el-col>
-            </el-row>
-          </el-scrollbar>
         </div>
 
       </template>
@@ -670,6 +604,7 @@ import {
   Picture,
   Setting
 } from '@element-plus/icons-vue'
+let activeIndex = ref(-1)//聊天对象默认赋值
 let groupMembers = ref([])//当前群成员
 let  drawerVisible = ref(false) //群设置和单聊设置弹窗
 let showNewgroup = ref(false)
@@ -1221,7 +1156,7 @@ const init=() =>{
     } else {
       console.log("您的浏览器支持WebSocket");
       console.log("当前登录用户"+userId)
-      let socketUrl = "ws://localhost:8081/imserver/" + userId;
+      let socketUrl = "ws://localhost:8082/imserver/" + userId;
       // if (socket != null) {
       //   socket.close();
       //   socket = null;
@@ -1374,7 +1309,10 @@ onMounted(() => {
   max-width: 370px;
   position: relative; /* Position relative for absolute positioning */
   flex: 1;
+  height: 100vh;
+  /*
   padding: 20px;
+  */
   border-right: 1px solid #eaeaea;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -1434,19 +1372,53 @@ onMounted(() => {
     max-width: none;
   }
 }*/
-/*.user-list-scroll {
-  top: 40px;
-  overflow-y: auto;
-  !*
-  height: calc(100% - 56px);
-  *!
-  height: 100%;
-  !*
-  position: relative;
-  *!
-  z-index: 1;
+/* 外层容器 - 禁用滚动并启用弹性布局 */
+.user-list-scroll {
+  height: 100vh !important; /* 强制视口高度 */
+  min-height: 0; /* 允许内容压缩 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important; /* 禁用外部滚动 */
 
-}*/
+  /* Element 滚动容器修正 */
+  .el-scrollbar {
+    flex: 1; /* 占据剩余空间 */
+    min-height: 0; /* 关键! 解除高度限制 */
+
+    /* 滚动包装层 */
+    .el-scrollbar__wrap {
+      height: calc(100% + 36px) !important; /* 滚动补偿 */
+      max-height: none !important;
+      overflow-y: scroll !important;
+      padding-bottom: 36px !important; /* 滚动条安全区 */
+      scroll-behavior: smooth;
+    }
+
+    /* 内容视图层 */
+    .el-scrollbar__view {
+      min-height: calc(100% + 10px); /* 强制溢出触发滚动 */
+      > div {
+        padding-bottom: 8px; /* 内容补偿 */
+      }
+    }
+  }
+
+  /* 搜索结果悬浮层特定修正 */
+  .user-list-scroll-search {
+    .el-scrollbar__wrap {
+      padding-bottom: 24px !important; /* 增加补偿 */
+    }
+  }
+}
+
+/* 浏览器兼容方案 */
+@supports (-moz-appearance:none) {
+  .el-scrollbar__wrap {
+    scrollbar-width: thin;
+    padding-bottom: 18px !important; /* 火狐滚动条较宽 */
+  }
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s;
 }
@@ -1454,10 +1426,10 @@ onMounted(() => {
   opacity: 0;
 }
 
-.search-active + .user-list-scroll {
+/*.search-active + .user-list-scroll {
   filter: blur(1px);
   pointer-events: none;
-}
+}*/
 /*.user-list-scroll-search{
   height: calc(100% - 40px);
   overflow-y: auto;
@@ -1475,14 +1447,14 @@ onMounted(() => {
   border: 1px solid #74ffd2;
 }
 
-.user-name {
+/*.user-name {
   font-weight: 800;
-  white-space: nowrap; /* 不换行 */
-  overflow: hidden; /* 溢出隐藏 */
+  white-space: nowrap; !* 不换行 *!
+  overflow: hidden; !* 溢出隐藏 *!
   padding-left: 15px;
-  text-overflow: ellipsis; /* 超出显示省略号 */
-  text-align: left; /* 添加左对齐属性 */
-}
+  text-overflow: ellipsis; !* 超出显示省略号 *!
+  text-align: left; !* 添加左对齐属性 *!
+}*/
 
 .user-last-message {
   color: #a19f9f;
@@ -1540,7 +1512,51 @@ onMounted(() => {
 .user-details {
   flex-grow: 1; /* 填充剩余空间 */
 }
+/* 头部行布局 - 微信样式 */
+.header-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  width: 100%;
+}
 
+.user-name {
+  font-size: 16px;
+  color: #191919;
+  max-width: 70%;
+  white-space: nowrap;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #888;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* 消息预览样式 */
+.last-message {
+  font-size: 11px;
+  color: #888;
+  text-align: left;
+  width: 100%;
+  line-height: 1.4;
+}
+
+/* 通用截断样式 */
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 适配深色模式 */
+@media (prefers-color-scheme: dark) {
+  .user-name { color: #e5e5e5; }
+  .last-message { color: #999; }
+  .user-details { border-color: #2d2d2d; }
+}
 .messageBox {
   display: flex;
   align-items: flex-start; /* 将头像和文本第一行对齐 */
@@ -1598,13 +1614,47 @@ onMounted(() => {
   background-color: #f56c6c; /* Red background for visibility */
   color: white; /* White text color */
 }
+.el-scrollbar {
+  height: 100vh;
+  overflow: hidden;
 
+  /* 关键容器修正 */
+  .el-scrollbar__wrap {
+    max-height: 100vh !important; /* 解除默认高度限制 */
+    padding-bottom: 8px !important; /* 滚动条安全区 */
+    overflow-y: scroll !important; /* 强制启用滚动 */
+  }
+
+  .el-scrollbar__view {
+    min-height: calc(100% + 1px); /* 强制触发溢出滚动 */
+  }
+}
 /* 容器布局 */
 .chat-container {
   display: flex;
-  height: 100vh;
-  width: 1280px;
+  height: 100vh; /* 使用视口高度而非百分比 */
+  width: 1280px; /* 固定宽度 */
+  overflow: hidden; /* 隐藏滚动条 */
+
+  /* 防止父容器溢出 */
+  flex-shrink: 0;
+  box-sizing: border-box;
+
+  /*!* 弹性子元素布局 *!
+  > * {
+    flex: 1;
+    min-width: 0; !* 防止弹性元素溢出 *!
+  }*/
 }
+
+/* 响应式处理 */
+@media screen and (max-width: 1280px) {
+  .chat-container {
+    width: 100vw; /* 小屏幕时占满视口 */
+    transform: translateX(0); /* 防止横向滚动 */
+  }
+}
+
 
 /*!* 左侧用户列表 *!
 .left-side {
@@ -1615,8 +1665,8 @@ onMounted(() => {
 }*/
 
 .search-wrapper {
-  position: relative;
-  padding: 12px;
+  position: absolute;
+  padding: 10px;
   border-bottom: 1px solid #e5e5e5;
   display: flex;
   gap: 8px; /* 元素间距 */
@@ -1748,56 +1798,111 @@ onMounted(() => {
   padding: 8px 20px;
   border-radius: 6px;
 }
-/* 新增导航栏样式 */
-.chat-container {
-  display: flex;
-  height: 100vh;
-}
+
 
 .nav-side {
+  --wechat-bg: #f8f8f8; /* 微信背景色 */
+  --wechat-active-bg: #ededed; /* 激活状态背景 */
+  --wechat-icon-color: #7f7f7f; /* 默认图标色 */
+  --wechat-active-color: #000000; /* 激活状态颜色 */
+  --wechat-border-color: #e6e6e6; /* 边框色 */
+
+  background: var(--wechat-bg);
   width: 72px;
-  background: #2e3238;
+  height: 100vh;
+  border-right: 1px solid var(--wechat-border-color);
+  flex-direction: column;
+  box-shadow: 1px 0 6px rgba(0, 0, 0, 0.1);
+  padding: 16px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
-  border-right: 1px solid #1e2025;
+}
+
+.nav-items {
+  flex: 1;
+  width: 100%;
 }
 
 .nav-item {
-  width: 48px;
-  height: 48px;
-  margin: 12px 0;
+  padding: 12px;
+  margin: 8px 0;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
-  position: relative;
   transition: all 0.3s;
+  position: relative;
+  display: flex;
+  justify-content: center;
 
   &:hover {
-    background: rgba(255,255,255,0.1);
+    background: #f3f3f3;
+
+    .nav-icon {
+      color: #333; /* 悬停时图标颜色加深 */
+    }
   }
 
   &.active {
-    background: rgba(255,255,255,0.2);
+    background: transparent !important; /* 移除背景色 */
 
     .nav-icon {
-      color: #70c1fa;
+      color: #07c160 !important; /* 激活状态图标变绿 */
+      filter: brightness(0.9); /* 颜色加深效果 */
     }
   }
 }
 
+/* 图标基础样式 */
 .nav-icon {
-  font-size: 24px;
-  color: #b9b9b9;
+  color: #666;
+  transition: color 0.3s;
+}
+
+/* 徽章定位调整 */
+.nav-badge,
+.message-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  .el-badge__content {
+    background: #07c160;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 4px;
+    font-size: 12px;
+  }
+}
+
+/* 用户头像样式 */
+.user-avatar {
+  border: 2px solid #eaeaea;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: #07c160;
+  }
+}
+
+
+.el-avatar {
+  border: 2px solid #eaeaea;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: #07c160;
+  }
+}
+
+.nav-icon {
+  color: #666;
+  transition: color 0.3s;
 }
 
 .nav-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 4px;
+  right: 4px;
 }
 
 /*!* 调整左侧内容区 *!
@@ -1830,7 +1935,18 @@ onMounted(() => {
 .user-item:hover {
   background: #f5f7fa;
 }
+/* 选中态样式覆盖 */
+.active-item {
+  background: #f5f7fa !important;
+  transition: background 0.3s ease-in-out;
+}
 
+/* 适配暗黑模式 */
+@media (prefers-color-scheme: dark) {
+  .user-item.active-item .content-wrapper {
+    background: #2d2d2d !important;
+  }
+}
 .user-avatar-wrapper {
   position: relative;
   margin-right: 16px;
@@ -1846,16 +1962,8 @@ onMounted(() => {
 
 .message-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  transform: scale(0.8);
-
-  :deep(.el-badge__content) {
-    height: var(--badge-size);
-    min-width: var(--badge-size);
-    padding: 0 5px;
-    line-height: var(--badge-size);
-  }
+  top: 4px;
+  right: 4px;
 }
 
 .online-dot {
@@ -1874,41 +1982,41 @@ onMounted(() => {
   min-width: 0;
 }
 
-.header-line {
+/*.header-line {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
-}
+}*/
 
-.user-name {
+/*.user-name {
   font-weight: 600;
   color: #303133;
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
+}*/
 
-.message-time {
+/*.message-time {
   color: #909399;
   font-size: 12px;
   flex-shrink: 0;
   margin-left: 8px;
-}
+}*/
 
-.last-message {
+/*.last-message {
   color: #606266;
   font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* 确保容器不会无限扩展 */
+  !* 确保容器不会无限扩展 *!
   max-width: 300px;
   display: flex;
   align-items: center;
   gap: 4px;
-}
+}*/
 .user-list-scroll-search {
   position: absolute;
   top: 3px; /* 根据搜索框高度调整 */
@@ -2394,7 +2502,7 @@ onMounted(() => {
 /* 添加以下样式 */
 .left-chat-container {
   width: 100%; /* 统一容器宽度 */
-  height: 100%;
+  height: 100vh;
   box-sizing: border-box;
 }
 
@@ -2403,22 +2511,6 @@ onMounted(() => {
   background: #fff;
 }*/
 
-.user-list-scroll {
-  overflow-y: auto;
-  /*
-  height: calc(100% - 56px);
-  */
-  position: relative;
-  height: 1000px; /* 固定高度 */
-  width: 100%;
-  z-index: 3;
-  /* 统一滚动条样式 */
-  .el-scrollbar__wrap {
-    padding: 3 33;
-    box-sizing: border-box;
-    max-height: 100% !important; /* 覆盖 Element 默认高度限制 */
-  }
-}
 
 /* 统一输入框样式 */
 .search-wrapper .el-input {
