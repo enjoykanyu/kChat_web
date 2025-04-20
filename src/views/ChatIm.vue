@@ -76,7 +76,7 @@
                 placeholder="微信号/手机号"
                 clearable
                 @keyup.enter.native="handleSearchUser"
-                class="search-input"
+                class="contact-search-input"
             >
               <i
                   slot="suffix"
@@ -1334,6 +1334,18 @@ onMounted(() => {
   box-shadow: 0 0 4px rgba(64, 158, 255, 0.3);
 }
 
+.contact-search-input{
+  flex: 1;
+  max-width: 370px;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+.contact-search-input:focus {
+  outline: none;
+  border-color: #409EFF;
+  box-shadow: 0 0 4px rgba(64, 158, 255, 0.3);
+}
 .add-btn {
   width: 32px;
   height: 32px;
@@ -2716,10 +2728,10 @@ label {
   border-right: 1px solid #e5e5e5;
 }
 
-.search-box {
+/*.search-box {
   padding: 12px;
   border-bottom: 1px solid #e5e5e5;
-}
+}*/
 
 .search-group-input {
   width: 100%;
