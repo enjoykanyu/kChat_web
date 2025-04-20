@@ -584,7 +584,7 @@
 // import request from "@/utils/request";
 import axios from "axios";
 import request from '../utils/request.ts'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox,ElMessage } from 'element-plus'
 
 let socket = null;
 import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw} from 'vue'
@@ -757,10 +757,13 @@ const handleSubmitApply=()=> {
       console.log(res)
     });
     showUserDialog.value = false
-    this.$message.success('好友申请已发送');
+    ElMessage.success('好友申请已发送');
+    // this.$message.success('好友申请已发送');
     showAddFriendForm.value = false;
   } catch (error) {
-    this.$message.error('发送失败，请重试');
+    // this.$message.error('发送失败，请重试');
+    ElMessage.error('发送失败，请重试');
+
   }
 }
 
@@ -808,16 +811,18 @@ const send=()=> {
   console.log(flag )
   if (!flag){
     if (!newMessage.value.content.trim()) {
-      this.$message.warning('请输入聊天内容')
+      // this.$message.warning('请输入聊天内容')
+      ElMessage.warning('请输入聊天内容')
+
       return
     }
     newMessage.value.message = newMessage.value.content.trim()
     if (loginUser.id == null) {
-      this.$message.error('登录用户编号获取失败,请重新登录!')
+      ElMessage.warning('登录状态无效，请重新登录')
       return
     }
     if (loginUser.id  === currentUser.id) {
-      this.$message.error('不能给自己发送信息!')
+      ElMessage.error('不能给自己发送信息!')
       return
     }
     newMessage.value.sendUser = loginUser.id
@@ -862,12 +867,12 @@ const send=()=> {
   }else {
     console.log("发送群聊id",currentGroupId.value);
     if (!newMessage.value.content.trim()) {
-      this.$message.warning('请输入聊天内容')
+      ElMessage.warning('请输入聊天内容')
       return
     }
     newMessage.value.message = newMessage.value.content.trim()
     if (loginUser.id == null) {
-      this.$message.error('登录用户编号获取失败,请重新登录!')
+      ElMessage.error('登录用户编号获取失败,请重新登录!')
       return
     }
     newMessage.value.sendUser = loginUser.id
@@ -1149,6 +1154,7 @@ const scrollToBottom = () =>{
 const init=() =>{
 
   console.log(window.sessionStorage.getItem("user"))
+  console.log(user)
   user.value = window.sessionStorage.getItem("user")
   if (user.value){
     console.log(window.sessionStorage.getItem("user"))
@@ -1180,6 +1186,7 @@ const init=() =>{
       };
       //  浏览器端收消息，获得从服务端发送过来的文本消息
       socket.onmessage = (msg) => {
+        console.log(msg);
         console.log("收到数据====" + msg.data)
         console.log(typeof msg.data)
         var data_new = JSON.parse(msg.data);
@@ -1203,15 +1210,21 @@ const init=() =>{
           })
         }else if(type === 1){ //处理用户之前请求好友关系
           setTimeout(() => {
-            this.$message.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
-            this.$message.success('验证理由'+data_new.content);
+            // this.$message.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
+            ElMessage.success('您收到了用户'+data_new.sendUserId+'好友发过来申请');
+            ElMessage.success('验证理由'+data_new.content);
+            // this.$message.success('验证理由'+data_new.content);
           }, 3000)
           //1，更新用户处理中的好友数量 数量=/requests/all/getPending.length
           getAllPending()
           //2，用户新的朋友列表请求所有的请求的朋友列表，通过或者拒绝的好友右边显示状态和理由 未处理过的显示通过和拒绝按钮
           //3，用户点击同意 发送消息给服务端同意 同时把消息存储进消息db 新建一条“通过了您的好友”消息 同时消息列表更新
         }else if(type === 3){
-
+          if (data_new.content ==='拒绝'){
+            ElMessage.error('您的好友请求被拒绝');
+          }else {
+            ElMessage.success('您的好友请求已通过');
+          }
           searchUserMessage()
           updateTab('message')
           //发送请求得展示申请的情况
@@ -1289,6 +1302,7 @@ const beforeCreate= ()=> {
             console.log(res)
             loginUser = res.data.data
             console.log(loginUser)
+            window.sessionStorage.setItem("user",res.data.data.id)
           }
       )
 }
