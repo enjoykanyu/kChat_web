@@ -24,7 +24,7 @@ instance.interceptors.request.use(config => {
     }else {
         console.log("未找到token")
         router.replace({
-            path: '/',
+            path: '/login',
             query: {
                 _t: Date.now()
             },
