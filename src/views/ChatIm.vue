@@ -8,7 +8,7 @@
         <div
             class="nav-item"
             :class="{ active: activeTab === 'profile' }"
-            @click="updateTab('profile')">
+            @click="showUserCard(loginUser)">
           <el-avatar :size="32" :src="loginUser.avatar" class="user-avatar"/>
         </div>
 
@@ -684,16 +684,21 @@ const showUserCard = (user) =>{
   //   this.isFriend = res.data.isFriend;
   //请求查看当前搜索用户是否为当前用户的好友
   showUserDialog.value = true
-  request.post("api/friends/search/isFriend", currentSearchUser
+  if (user.id!=loginUser.id){
+    request.post("api/friends/search/isFriend", currentSearchUser
 
-  ).then(res => {
-    if (res.data.code === 200) {
-      isFriend.value = true
-    }else {
-      isFriend.value = false
-    }
-    console.log(res)
-  })
+    ).then(res => {
+      if (res.data.code === 200) {
+        isFriend.value = true
+      }else {
+        isFriend.value = false
+      }
+      console.log(res)
+    })
+  }else {
+    isFriend.value = true
+  }
+
   // } catch (error) {
   //   this.searchResult = null;
   //   this.showResultLayer = true;
