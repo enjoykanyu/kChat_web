@@ -6,20 +6,14 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'login',
-      component: Login
-    },
-    {
-      path: '/chatIm',
       name: 'chatIm',
       component: () => import('../views/ChatIm.vue'),
     },
     {
-      path: '/chat',
-      name: 'chat',
-      component: () => import('../views/ChatViewNew.vue'),
-      // props: true
-    }
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginNew.vue'),
+    },
   ]
 })
 
