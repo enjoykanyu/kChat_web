@@ -225,6 +225,7 @@ const sendCode = () => {
   request.post(`/api/user/code?phone=${loginForm.phone}`).then((res) => {
     console.log(res)
     console.log(333)
+    alert("您本次的验证码为"+res.data.data.code+"有效期5分钟")
     window.sessionStorage.setItem("token", res.data.data.token)
     console.log(window.sessionStorage.getItem("token"))
   })
