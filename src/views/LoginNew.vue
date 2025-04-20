@@ -189,10 +189,12 @@ const handleLogin=()=> {
         console.log(window.sessionStorage.getItem("token"))
           console.log(res.data.success)
           // 登录成功逻辑
-          router.push('/chatim')
+          router.push('/')
       }else if (res.data.errorMsg === '用户不存在') {
           alert("用户不存在，请注册")
         activeTab.value = 'register'
+      }else {
+        alert(res.data.errorMsg)
       }
 
   })
