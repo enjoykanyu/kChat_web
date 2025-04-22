@@ -527,21 +527,84 @@
 
 
       </el-scrollbar>
-      <div class="chat-input">
-        <el-input
+<!--      <div class="chat-input">-->
+<!--        <el-input-->
+<!--            v-model="newMessage.content"-->
+<!--            placeholder="请输入聊天内容"-->
+<!--            type="textarea"-->
+<!--            :rows="2"-->
+<!--            resize="none"-->
+<!--            class="message-input"-->
+<!--            @keydown.enter.native.prevent="send"-->
+<!--        ></el-input>-->
+<!--        <el-button-->
+<!--            type="primary"-->
+<!--            @click.native="send"-->
+<!--            class="send-button"-->
+<!--        >发送</el-button>-->
+<!--      </div>-->
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <div class="left-tools">
+          <button class="tool-btn" @click="toggleVoiceMode">
+            <span class="icon" :class="isVoiceMode ? 'voice' : 'keyboard'"></span>
+          </button>
+          <button class="tool-btn" @click="toggleEmojiPicker">
+            <span class="icon emoji"></span>
+          </button>
+          <button class="tool-btn" @click="triggerFileInput">
+            <span class="icon file"></span>
+            <input type="file" ref="fileInput" class="hidden-file" @change="handleFile">
+          </button>
+        </div>
+
+        <div class="right-tools">
+          <button class="tool-btn" @click="startVideoCall">
+            <span class="icon video"></span>
+          </button>
+          <button class="tool-btn" @click="startVoiceCall">
+            <span class="icon phone"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 输入区域 -->
+      <div class="input-area">
+        <!-- 语音输入模式 -->
+        <div v-if="isVoiceMode" class="voice-mode">
+          <button
+              class="voice-btn"
+              @mousedown="startRecord"
+              @mouseup="stopRecord"
+              @touchstart="startRecord"
+              @touchend="stopRecord"
+          >
+            {{ recording ? `录音中 ${duration}s` : '按住 说话' }}
+          </button>
+        </div>
+
+        <!-- 文本输入模式 -->
+        <div v-else class="text-mode">
+        <textarea
+            ref="textarea"
             v-model="newMessage.content"
-            placeholder="请输入聊天内容"
-            type="textarea"
-            :rows="2"
-            resize="none"
             class="message-input"
-            @keydown.enter.native.prevent="send"
-        ></el-input>
-        <el-button
-            type="primary"
-            @click.native="send"
-            class="send-button"
-        >发送</el-button>
+            placeholder="请输入聊天内容"
+            @input="autoResize"
+            @keydown.enter.prevent="send"
+        ></textarea>
+          <button class="send-btn" @click="send">发送</button>
+        </div>
+      </div>
+
+      <!-- 表情选择面板 -->
+      <div v-show="showEmojiPicker" class="emoji-panel">
+        <div
+            class="emoji-item"
+            v-for="emoji in emojis"
+            :key="emoji"
+            @click="insertEmoji(emoji)"
+        >{{ emoji }}</div>
       </div>
       <!-- 抽屉内容 -->
       <div class="drawer-mask" v-show="drawerVisible" @click="drawerVisible = false"></div>
@@ -587,7 +650,7 @@ import request from '../utils/request.ts'
 import { ElMessageBox,ElMessage } from 'element-plus'
 
 let socket = null;
-import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw} from 'vue'
+import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw,computed} from 'vue'
 // 在setup函数中获取组件实例
 const instance = getCurrentInstance();
 // const container = instance?.proxy?.$refs.messageContainer; // 需添加可选链操作符‌:ml-citation{ref="3,8" data="citationList"}
@@ -656,6 +719,131 @@ let searchUserName=ref('')
 let  showSearchResult=ref(false)
 let groupName = ref('') //群名称
 // 状态管理
+const isVoiceMode = ref(false)
+const showEmojiPicker = ref(false)
+const message = ref('')
+const recording = ref(false)
+const duration = ref(0)
+const fileInput = ref<HTMLInputElement | null>(null)
+const textarea = ref<HTMLTextAreaElement | null>(null)
+
+// 录音相关
+let mediaRecorder: MediaRecorder | null = null
+let audioChunks: Blob[] = []
+
+// 模拟表情数据
+const emojis = [
+  '😊', '🥰', '🤩', '😇',   // 笑脸类
+  '🤔', '😏', '😒', '🙄',   // 表情符号
+  '🤯', '🥶', '😡', '🤢',   // 夸张表情
+  '🫡', '🫠', '🥺', '😈',   // 新增Unicode 14-15表情:ml-citation{ref="5" data="citationList"}
+  '👋', '🤘', '🤙', '🤌',   // 手势符号
+  '🐶', '🐱', '🦁', '🐼',   // 动物类
+  '🌻', '🌼', '🍄', '🌵',   // 植物类
+  '🍕', '🍔', '🍩', '🍹',   // 食物饮料
+  '⚽', '🎮', '🎲', '🎸'    // 活动物品类
+];
+
+// 自动调整输入框高度
+const autoResize = () => {
+  if (textarea.value) {
+    textarea.value.style.height = 'auto'
+    textarea.value.style.height = `${textarea.value.scrollHeight}px`
+  }
+}
+
+// 切换语音模式
+const toggleVoiceMode = () => {
+  isVoiceMode.value = !isVoiceMode.value
+  showEmojiPicker.value = false
+}
+
+// 文件处理
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFile = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    console.log('选择文件:', file)
+    input.value = ''
+  }
+}
+
+// 表情处理
+const toggleEmojiPicker = () => {
+  showEmojiPicker.value = !showEmojiPicker.value
+}
+
+const insertEmoji = (emoji: string) => {
+  console.log(emoji)
+  console.log(newMessage.value.content)
+  if (newMessage.value.content) {
+    newMessage.value.content += emoji
+  }else {
+    newMessage.value.content = emoji
+  }
+  console.log("加入表情包之前")
+  console.log(emoji)
+  console.log(newMessage.value.content)
+  nextTick(autoResize)
+  showEmojiPicker.value = false
+}
+
+// 语音录制
+const startRecord = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder = new MediaRecorder(stream)
+
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunks.push(e.data)
+    }
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+      console.log('录音文件:', audioBlob)
+      audioChunks = []
+    }
+
+    mediaRecorder.start()
+    recording.value = true
+    startTimer()
+  } catch (err) {
+    console.error('录音权限被拒绝:', err)
+  }
+}
+
+const stopRecord = () => {
+  mediaRecorder?.stop()
+  recording.value = false
+  duration.value = 0
+}
+
+// 录音计时器
+const startTimer = () => {
+  const timer = setInterval(() => {
+    if (recording.value) {
+      duration.value++
+    } else {
+      clearInterval(timer)
+    }
+  }, 1000)
+}
+
+// // 消息发送
+// const sendMessage = () => {
+//   if (message.value.trim()) {
+//     console.log('发送消息:', message.value)
+//     message.value = ''
+//     if (textarea.value) textarea.value.style.height = 'auto'
+//   }
+// }
+
+// 通话功能
+const startVideoCall = () => console.log('发起视频通话')
 // const activeTab = ref('message') // 当前激活的tab
 const totalUnread = ref(3)       // 未读消息数示例
 
@@ -1296,6 +1484,7 @@ const addBlacklist =()=>{
 }
 const beforeCreate= ()=> {
   axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
+  console.log(sessionStorage.getItem("token"));
   // 获取登录用户userId,请根据自己实际项目获取
   request.get("api/user/login/user")
       .then(
@@ -3226,5 +3415,180 @@ label {
 
 .action-item + .action-item {
   margin-top: 8px;
+}
+/*聊天框*/
+/* 工具栏样式 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+/* 修复工具栏布局 */
+.left-tools, .right-tools {
+  display: flex !important;  /* 解除注释并增强权重 */
+  gap: 8px;
+}
+
+/* 优化按钮容器 */
+.tool-btn {
+  position: relative;  /* 为图标定位提供基准 */
+  background: transparent !important;  /* 清除可能存在的背景色 */
+}
+
+/* 重定义图标样式 */
+.icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 添加颜色变量 */
+:root {
+  --icon-color: #000000;
+  --icon-hover: #07C160;
+}
+
+/* 动态颜色控制 */
+.tool-btn:hover .icon {
+  filter: brightness(0.85);
+}
+
+/* 更新所有图标URL的fill值 */
+.icon.voice {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93A7.33 7.33 0 0 1 5 11H3c0 3.07 2.24 5.62 5.13 6h.75c3.53 0 6.43-2.61 6.92-6h-2.02c-.48 2.28-2.4 4-4.78 4s-4.3-1.72-4.78-4H5c0 3.31 2.69 6 6 6v3h2v-3.07z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 其他图标同理更新fill值为var(--icon-color)的URL编码 */
+
+
+/* 键盘图标 */
+.icon.keyboard {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm4 10H8v-1c0-2 4-3.1 4-3.1s4 1.1 4 3.1v1z'/%3E%3C/svg%3E");
+}
+
+/* 表情图标 */
+.icon.emoji {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M12 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10zm0-18c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z'/%3E%3Ccircle cx='8.5' cy='10.5' r='1.5'/%3E%3Ccircle cx='15.5' cy='10.5' r='1.5'/%3E%3Cpath d='M12 17c-2.003 0-3.863-1.012-4.982-2.682l-1.743.97C6.314 17.325 8.974 19 12 19s5.686-1.675 6.725-4.712l-1.743-.97C15.863 15.988 14.003 17 12 17z'/%3E%3C/svg%3E");
+}
+
+/* 文件图标 */
+.icon.file {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/%3E%3C/svg%3E");
+}
+
+/* 视频图标 */
+.icon.video {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/%3E%3C/svg%3E");
+}
+
+/* 电话图标 */
+.icon.phone {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z'/%3E%3C/svg%3E");
+}
+
+/* 输入区域 */
+.input-area {
+  margin-top: 8px;
+}
+
+/* 语音按钮 */
+.voice-mode {
+  display: flex;
+  justify-content: center;
+}
+
+.voice-btn {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #fff;
+  color: #666;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.voice-btn:hover {
+  background: #f0f0f0;
+}
+
+/* 文本输入框 */
+.text-mode {
+  display: flex;
+  gap: 8px;
+}
+
+.message-input {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 8px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  transition: border-color 0.2s;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #07c160;
+  box-shadow: 0 0 0 2px rgba(7, 193, 96, 0.1);
+}
+
+.send-btn {
+  padding: 6px 16px;
+  background: #07c160;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.send-btn:hover {
+  background: #06ad56;
+}
+
+/* 表情面板 */
+.emoji-panel {
+  position: absolute;
+  bottom: 60px;
+  background: white;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.emoji-item {
+  cursor: pointer;
+  padding: 4px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.emoji-item:hover {
+  background: #f5f5f5;
+}
+
+.hidden-file {
+  display: none;
 }
 </style>
