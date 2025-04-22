@@ -905,7 +905,8 @@ const send=()=> {
       })
     }
   }
-
+  //清空聊天框
+  newMessage.value.content = ''
 
 }
 //当前群聊设置
