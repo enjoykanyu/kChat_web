@@ -805,6 +805,14 @@ const startRecord = async () => {
     mediaRecorder.onstop = () => {
       const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
       console.log('录音文件:', audioBlob)
+      const formData = new FormData()
+      formData.append('audioFile', audioBlob, 'recording.webm')  // 使用FormData封装二进制数据:ml-citation{ref="2" data="citationList"}
+      request.post('/api/audio/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }).then(res => {
+        console.log('上传成功:', res.data)
+      })
+      //录音文件清空
       audioChunks = []
     }
 
