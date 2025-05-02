@@ -27,6 +27,21 @@
           />
         </div>
 
+        <!-- 智能机器人 -->
+        <div
+            class="nav-item"
+            :class="{ active: activeTab === 'chatbot' }"
+            @click="updateTab('chatbot')">
+          <el-icon :size="26" class="nav-icon">
+            <ChatDotRound />
+          </el-icon>
+          <el-badge
+              v-if="totalUnread > 0"
+              :value="totalUnread"
+              class="nav-badge"
+          />
+        </div>
+
         <!-- 通讯录 -->
         <div
             class="nav-item"
