@@ -33,7 +33,8 @@
             :class="{ active: activeTab === 'chatbot' }"
             @click="updateTab('chatbot')">
           <el-icon :size="26" class="nav-icon">
-            <ChatDotRound />
+            <!-- 替换为专用机器人图标 -->
+            <MagicStick />
           </el-icon>
           <el-badge
               v-if="totalUnread > 0"
@@ -494,7 +495,7 @@
       </template>
     </div>
     <!-- Right side: Chat box -->
-    <div class="right-side">
+    <div class="right-side" v-if="activeTab !== 'chatbot'">
       <!-- Chat header -->
       <div class="chat-header" style="display: flex; align-items: center; justify-content: space-between;">
         <!--        :class="{ 'long-name': currentUser.userName.length > 6 }" -->
@@ -655,14 +656,154 @@
         </div>
       </div>
     </div>
+    <div v-else>
+      <div class="bot-chat-container">
+        <!-- 聊天消息区域 -->
+        <div class="bot-chat-messages" ref="messagesContainer">
+          <div v-for="message in bot_messages" :key="message.id"
+               :class="['message', message.sender]">
+            <div class="avatar">
+              <img :src="message.sender === 'user' ? userAvatar : botAvatar" alt="avatar">
+            </div>
+            <div class="bubble">
+
+              <div class="content"  v-html="renderMarkdown(message.content)"></div>
+              <!--
+                        <div class="content" v-else>{{ message.content }}</div>
+              -->
+              <div class="status">
+                <span class="time">{{ message.timestamp }}</span>
+                <span v-if="message.loading" class="typing-indicator">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="bot-input-area">
+      <textarea v-model="inputMessage"
+                @keydown.enter.exact.prevent="sendMessage"
+                placeholder="输入你的消息..."></textarea>
+          <button @click="sendMessage" :disabled="isSending">
+            <span v-if="!isSending">发送</span>
+            <span v-else class="sending-indicator"></span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+
 // import request from "@/utils/request";
 import axios from "axios";
 import request from '../utils/request.ts'
 import { ElMessageBox,ElMessage } from 'element-plus'
+/*智能机器人*/
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
+const renderMarkdown = (content) => {
+  return DOMPurify.sanitize(marked.parse(content))
+}
+interface ChatMessage {
+  id: string
+  content: string
+  sender: 'user' | 'bot'
+  timestamp: string
+  loading?: boolean
+}
+
+const bot_messages = reactive<ChatMessage[]>([])
+const inputMessage = ref('')
+const isSending = ref(false)
+const messagesContainer = ref<HTMLElement | null>(null)
+
+const userAvatar = '/path/to/user-avatar.png'
+const botAvatar = '/path/to/bot-avatar.png'
+
+
+const sendMessage = async () => {
+  if (!inputMessage.value.trim() || isSending.value) return
+
+  // 用户消息
+  const userMsg: ChatMessage = {
+    id: Date.now().toString(),
+    content: inputMessage.value.trim(),
+    sender: 'user',
+    timestamp: new Date().toLocaleTimeString()
+  }
+  bot_messages.push(userMsg)
+
+  // 机器人响应占位
+  const botMsg: ChatMessage = {
+    id: `bot-${Date.now()}`,
+    content: '',
+    sender: 'bot',
+    timestamp: new Date().toLocaleTimeString(),
+    loading: true
+  }
+  bot_messages.push(botMsg)
+
+  inputMessage.value = ''
+  isSending.value = true
+  // scrollToBottom()
+
+  try {
+    const sessionId = crypto.randomUUID()
+    // const eventSource = new EventSource(`api/bot/streamChat?message=${encodeURIComponent(userMsg.content)}`)
+
+    // 发起带有 Authorization 头的流式请求
+    await fetchEventSource(`api/streamChat?message=${encodeURIComponent(userMsg.content)}`, {
+      method: 'GET',   // 或 POST（需服务端支持）
+      headers: {
+        'Authorization': sessionStorage.getItem("token"),  // 注入认证头 :ml-citation{ref="8" data="citationList"}
+      },
+      onopen(response) {
+        if (response.ok) return;  // 连接成功
+        throw new Error('连接失败');
+      },
+      onmessage(event) {
+        // 处理流式数据（与原 EventSource 逻辑相同）
+        const index = bot_messages.findIndex(m => m.id === botMsg.id)
+        if (index !== -1) {
+          bot_messages[index].content += event.data
+          bot_messages[index].loading = false
+          bot_messages[index].parsedContent = renderMarkdown(bot_messages[index].content)
+          // scrollToBottom()
+        }
+      },
+      onerror(err) {
+        console.error('流式请求异常:', err);
+      }
+    });
+    eventSource.onmessage = (event) => {
+      const index = bot_messages.findIndex(m => m.id === botMsg.id)
+      if (index !== -1) {
+        bot_messages[index].content += event.data
+        bot_messages[index].loading = false
+        bot_messages[index].parsedContent = renderMarkdown(bot_messages[index].content)
+
+        // scrollToBottom()
+      }
+    }
+
+    eventSource.onerror = () => {
+      eventSource.close()
+      isSending.value = false
+    }
+
+  } catch (error) {
+    console.error('Error:', error)
+    isSending.value = false
+  }
+}
 
 let socket = null;
 import { reactive,ref,onMounted,getCurrentInstance,nextTick,toRaw,computed} from 'vue'
@@ -1379,7 +1520,7 @@ const init=() =>{
     } else {
       console.log("您的浏览器支持WebSocket");
       console.log("当前登录用户"+userId)
-      let socketUrl = "ws://localhost:8082/imserver/" + userId;
+      let socketUrl = "ws://localhost:8083/imserver/" + userId;
       // if (socket != null) {
       //   socket.close();
       //   socket = null;
@@ -3614,4 +3755,172 @@ label {
 .hidden-file {
   display: none;
 }
+
+.bot-chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.bot-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: linear-gradient(180deg, #f0f2f5 0%, #ffffff 100%);
+}
+
+.message {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bubble {
+  max-width: 70%;
+  position: relative;
+}
+
+.bubble .content {
+  padding: 12px 16px;
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.message.bot .content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px 12px 12px 4px;
+}
+
+.message.user .content {
+  background: #3875f6;
+  color: white;
+  border-radius: 12px 12px 4px 12px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.message.user .status {
+  justify-content: flex-end;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #999;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+}
+
+.bot-input-area {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+}
+
+textarea {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+  font-family: inherit;
+}
+
+button {
+  padding: 0 20px;
+  background: #3875f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.sending-indicator {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.bubble :deep() pre {
+  background: #f8f8f8;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.bubble :deep() code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+
+.bubble :deep() ul,
+.bubble :deep() ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.bubble :deep() blockquote {
+  border-left: 4px solid #ddd;
+  margin: 8px 0;
+  padding-left: 12px;
+  color: #666;
+}
+
+
 </style>
