@@ -1421,6 +1421,9 @@ const handleApply =(requestid,accept)=>{
     console.log(res.data)
     friendApplications.value = res.data
     showDialog.value = false
+
+    //更新未处理好友请求
+    getAllPending()
   })
 }
 /*发起群聊*/
