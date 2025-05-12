@@ -1107,11 +1107,19 @@ const handleSubmitApply=()=> {
       reason:applyReason.value,
     }).then(res => {
       console.log(res)
+      if(res.data.code === 200) {
+        showUserDialog.value = false
+        ElMessage.success('好友申请已发送');
+        // this.$message.success('好友申请已发送');
+        showAddFriendForm.value = false;
+      }else {
+        ElMessage.error('发送失败，请重试');
+      }
+    }).catch(err => {
+      console.log(err)
+      ElMessage.error('发送失败，请重试');
     });
-    showUserDialog.value = false
-    ElMessage.success('好友申请已发送');
-    // this.$message.success('好友申请已发送');
-    showAddFriendForm.value = false;
+
   } catch (error) {
     // this.$message.error('发送失败，请重试');
     ElMessage.error('发送失败，请重试');
