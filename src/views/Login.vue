@@ -26,6 +26,8 @@
 // }
 import { reactive } from 'vue'
 import axios   from "axios";
+import request from '../utils/request.ts'
+
 const formInline = reactive({
   phone: '',
   password: '',
@@ -34,7 +36,7 @@ axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("
 
 
 const onSubmit = () => {
-  axios.post("api/user/login", formInline)
+  request.post("api/user/login", formInline)
       .then(
           res => {
             console.log(res)
@@ -47,7 +49,7 @@ const onSubmit = () => {
   console.log("成功")
   console.log(window.sessionStorage.getItem("token"))
   axios.defaults.headers.common['authorization'] = window.sessionStorage.getItem("token");
-  axios.get("api/user/login/user")
+  request.get("api/user/login/user")
       .then(
           res => {
             console.log(res)
