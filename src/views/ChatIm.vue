@@ -760,7 +760,7 @@ const sendMessage = async () => {
     // const eventSource = new EventSource(`api/bot/streamChat?message=${encodeURIComponent(userMsg.content)}`)
 
     // 发起带有 Authorization 头的流式请求
-    await fetchEventSource(`api/streamChat?message=${encodeURIComponent(userMsg.content)}`, {
+    await fetchEventSource(`api/streamChat?message=${encodeURIComponent(userMsg.content)}&sessionId=333`, {
       method: 'GET',   // 或 POST（需服务端支持）
       headers: {
         'Authorization': sessionStorage.getItem("token"),  // 注入认证头 :ml-citation{ref="8" data="citationList"}
